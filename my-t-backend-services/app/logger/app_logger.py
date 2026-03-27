@@ -44,7 +44,7 @@ logger.add(
            "<level>{level: <8}</level> | "
            "<cyan>{file}</cyan>:<cyan>{name}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
     serialize=False,
-    enqueue=True,
+    enqueue=False,
     level="DEBUG"  # Log everything to file
 )
 
