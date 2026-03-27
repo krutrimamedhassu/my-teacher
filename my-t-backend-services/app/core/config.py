@@ -37,10 +37,9 @@ class Settings(BaseSettings):
     TITLE_OF_THE_PROJECT: str
     DESCRIPTION_OF_THE_PROJECT: str
     VERSION: str
-    
+
     # CORS settings
-    BACKEND_CORS_ORIGINS: List[str] = ["*"]
-    
+    BACKEND_CORS_ORIGINS: Optional[str]
 
     # Document handling settings
     MAX_DOCUMENT_SIZE_MB: int
