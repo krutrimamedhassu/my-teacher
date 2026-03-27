@@ -1,0 +1,13 @@
+<svg width="84" height="84" viewBox="0 0 84 84" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <!-- Mic capsule with rounded ends -->
+    <rect x="33" y="13" width="18" height="32" rx="9" stroke="black" stroke-width="6" fill="white"/>
+
+    <!-- Arc arms (scaled up and moved down) -->
+    <path d="M21 42C21 58 63 58 63 42" stroke="black" stroke-width="6" stroke-linecap="round" fill="none"/>
+
+    <!-- Vertical stem (scaled and moved down) -->
+    <line x1="42" y1="55" x2="42" y2="70" stroke="black" stroke-width="6" stroke-linecap="round"/>
+
+    <!-- Horizontal line at the bottom (moved to y=81) -->
+    <line x1="31" y1="70" x2="53" y2="70" stroke="black" stroke-width="6" stroke-linecap="round"/>
+</svg>

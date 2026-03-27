@@ -1,0 +1,7 @@
+<svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Lens -->
+  <circle cx="20" cy="20" r="12" stroke="black" stroke-width="4"/>
+
+  <!-- Handle starting right at the circle's edge -->
+  <line x1="28.5" y1="28.5" x2="36" y2="36" stroke="black" stroke-width="4" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,611 @@
+/* ChatPage.css - Additional styles for the chat interface */
+
+/* Custom scrollbar for the messages area */
+.messages-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+}
+
+.messages-container::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+/* Smooth animations for message bubbles */
+.message-bubble {
+    animation: fadeInUp 0.3s ease-out;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Typing indicator animation */
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 16px;
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 16px;
+    width: fit-content;
+}
+
+.typing-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.4);
+    animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) {
+    animation-delay: -0.32s;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@keyframes typing {
+    0%, 80%, 100% {
+        transform: scale(0.8);
+        opacity: 0.5;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Animated jumping dots for TypingIndicator */
+.typing-jump-dot {
+    display: inline-block;
+    font-size: 2.8rem;
+    line-height: 1;
+    margin-right: 0.01em;
+    color: #bbb;
+    animation: typing-color-wave 1.2s infinite;
+}
+.typing-jump-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+.typing-jump-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+.typing-jump-dot:last-child {
+    margin-right: 0;
+}
+@keyframes typing-color-wave {
+    0%, 80%, 100% {
+        color: #bbb;
+        opacity: 0.5;
+    }
+    40% {
+        color: #444;
+        opacity: 1;
+    }
+}
+
+/* Hover effects for conversation items */
+.conversation-item:hover {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Focus styles for better accessibility */
+.chat-input:focus-within {
+    box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .message-bubble {
+        max-width: 85% !important;
+    }
+
+    .sidebar-drawer {
+        width: 100% !important;
+    }
+
+    /* Floating input adjustments for mobile */
+    .chat-input {
+        left: 50% !important;
+        right: auto !important;
+        width: calc(100% - 20px) !important;
+        max-width: min(778px, calc(100% - 20px)) !important;
+        z-index: 1200 !important; /* Ensure input stays on top on mobile */
+    }
+
+    /* Mobile positioning for input with messages */
+    .chat-input[data-has-messages="true"] {
+        bottom: 10px !important;
+        top: auto !important;
+        transform: translateX(-50%) !important;
+    }
+
+    /* Mobile positioning for input without messages */
+    .chat-input[data-has-messages="false"] {
+        top: calc(40% + 10px) !important;
+        bottom: auto !important;
+        transform: translate(-50%, -50%) !important;
+    }
+
+    /* Adjust chat rail for mobile to prevent overlap */
+    .chat-rail {
+        padding-bottom: 140px !important; /* More bottom padding on mobile */
+        height: calc(100vh - 140px) !important;
+        max-height: calc(100vh - 140px) !important;
+    }
+}
+
+/* Additional responsive adjustments for desktop with both sidebars */
+@media (min-width: 769px) {
+    .message-bubble {
+        max-width: 70% !important;
+    }
+
+    /* Ensure proper spacing when both sidebars are open */
+    .messages-container {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+}
+
+/* Small desktop optimizations (1024px - 1200px) */
+@media (min-width: 769px) and (max-width: 1200px) {
+    .message-bubble {
+        max-width: 85% !important;
+    }
+
+    /* Tighter chat rail on smaller desktops */
+    .chat-rail {
+        max-width: 650px !important;
+        width: 85vw !important;
+    }
+
+    /* Reduce sidebar padding on smaller screens */
+    .sidebar-drawer {
+        min-width: 220px !important;
+    }
+}
+
+/* Very small desktop screens where both sidebars cause issues */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .chat-rail {
+        max-width: 500px !important;
+        width: 80vw !important;
+        padding-top: 60px !important;
+        padding-bottom: 80px !important;
+    }
+
+    .message-bubble {
+        max-width: 90% !important;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .typing-indicator {
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .typing-dot {
+        background: rgba(255, 255, 255, 0.6);
+    }
+}
+
+/* Code block styling */
+.code-block {
+    background: #f6f8fa;
+    border: 1px solid #e1e4e8;
+    border-radius: 6px;
+    padding: 16px;
+    overflow-x: auto;
+    max-width: 100%;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 14px;
+    line-height: 1.45;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.code-block pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    max-width: 100%;
+}
+
+.code-block code {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Inline code styling */
+.inline-code {
+    background: rgba(175, 184, 193, 0.2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+    font-size: 0.875em;
+}
+
+/* Link styling */
+.message-link {
+    color: #0969da;
+    text-decoration: none;
+}
+
+.message-link:hover {
+    text-decoration: underline;
+}
+
+/* List styling */
+.message-list {
+    margin: 8px 0;
+    padding-left: 20px;
+}
+
+.message-list-item {
+    margin: 4px 0;
+}
+
+/* Blockquote styling */
+.message-blockquote {
+    border-left: 4px solid #d0d7de;
+    padding-left: 16px;
+    margin: 8px 0;
+    color: #656d76;
+}
+
+/* Table styling */
+.message-table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 8px 0;
+}
+
+.message-table th,
+.message-table td {
+    border: 1px solid #d0d7de;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.message-table th {
+    background: #f6f8fa;
+    font-weight: 600;
+}
+
+/* Chat rail centers all content and sets max width */
+.chat-rail {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: min(778px, calc(100% - 32px));
+    width: calc(100% - 32px);
+    padding-top: 70px;
+    padding-bottom: 120px; /* Increased bottom padding to prevent last message from being covered by input */
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    height: calc(100vh - 120px); /* Set explicit height to prevent overflow */
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    scrollbar-width: none; /* Firefox */
+}
+.chat-rail::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+/* Bubbles and input bar fill the rail, prevent overflow */
+.message-bubble,
+.chat-input {
+    width: 100%;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+}
+
+/* Remove blue focus outline from chat elements - more comprehensive */
+.chat-input,
+.chat-input *,
+.chat-input:focus,
+.chat-input:focus-visible,
+.chat-input *:focus,
+.chat-input *:focus-visible,
+.chat-input .MuiOutlinedInput-root,
+.chat-input .MuiOutlinedInput-root:focus,
+.chat-input .MuiOutlinedInput-root:focus-visible,
+.chat-input .MuiInputBase-root,
+.chat-input .MuiInputBase-root:focus,
+.chat-input .MuiInputBase-root:focus-visible,
+.chat-input .MuiTextField-root,
+.chat-input .MuiTextField-root:focus,
+.chat-input .MuiTextField-root:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove focus ring from Material-UI components inside chat */
+.chat-input .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline {
+    border: none !important;
+}
+
+.chat-input .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+    border: none !important;
+}
+
+/* Keep focus styles for other elements but exclude chat components */
+*:focus-visible:not(.chat-input *):not(.chat-input) {
+    outline: 2px solid var(--ring-color, #007aff);
+    outline-offset: 2px;
+}
+
+:focus:not(:focus-visible) {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Utility class for stubborn elements */
+.no-ring:focus,
+.no-ring:active {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Additional aggressive focus removal for chat components */
+.chat-input,
+.chat-input *,
+.chat-input *::before,
+.chat-input *::after {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Override any Material-UI focus styles in chat */
+.chat-input .MuiOutlinedInput-root,
+.chat-input .MuiOutlinedInput-root *,
+.chat-input .MuiInputBase-root,
+.chat-input .MuiInputBase-root *,
+.chat-input .MuiTextField-root,
+.chat-input .MuiTextField-root * {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Browser-specific focus removal */
+.chat-input input:focus,
+.chat-input textarea:focus,
+.chat-input input:focus-visible,
+.chat-input textarea:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove any remaining focus indicators */
+.chat-input *:focus,
+.chat-input *:focus-visible,
+.chat-input *:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove blue focus outline from profile modal */
+.MuiModal-root,
+.MuiModal-root *,
+.MuiModal-root:focus,
+.MuiModal-root:focus-visible,
+.MuiModal-root *:focus,
+.MuiModal-root *:focus-visible,
+.MuiModal-root *:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove focus outline from Material-UI components in profile modal */
+.MuiModal-root .MuiOutlinedInput-root,
+.MuiModal-root .MuiOutlinedInput-root *,
+.MuiModal-root .MuiInputBase-root,
+.MuiModal-root .MuiInputBase-root *,
+.MuiModal-root .MuiTextField-root,
+.MuiModal-root .MuiTextField-root *,
+.MuiModal-root .MuiButton-root,
+.MuiModal-root .MuiButton-root *,
+.MuiModal-root .MuiIconButton-root,
+.MuiModal-root .MuiIconButton-root * {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Browser-specific focus removal for profile modal */
+.MuiModal-root input:focus,
+.MuiModal-root textarea:focus,
+.MuiModal-root input:focus-visible,
+.MuiModal-root textarea:focus-visible,
+.MuiModal-root button:focus,
+.MuiModal-root button:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove blue focus outline from all buttons and interactive elements */
+.MuiButton-root,
+.MuiButton-root:focus,
+.MuiButton-root:focus-visible,
+.MuiButton-root:focus-within,
+.MuiIconButton-root,
+.MuiIconButton-root:focus,
+.MuiIconButton-root:focus-visible,
+.MuiIconButton-root:focus-within,
+.MuiFab-root,
+.MuiFab-root:focus,
+.MuiFab-root:focus-visible,
+.MuiFab-root:focus-within,
+.MuiCard-root,
+.MuiCard-root:focus,
+.MuiCard-root:focus-visible,
+.MuiCard-root:focus-within,
+.MuiPaper-root,
+.MuiPaper-root:focus,
+.MuiPaper-root:focus-visible,
+.MuiPaper-root:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove focus outline from all Material-UI components */
+.MuiButtonBase-root,
+.MuiButtonBase-root:focus,
+.MuiButtonBase-root:focus-visible,
+.MuiButtonBase-root:focus-within,
+.MuiListItem-root,
+.MuiListItem-root:focus,
+.MuiListItem-root:focus-visible,
+.MuiListItem-root:focus-within,
+.MuiTab-root,
+.MuiTab-root:focus,
+.MuiTab-root:focus-visible,
+.MuiTab-root:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove focus outline from navigation and sidebar elements */
+.MuiDrawer-root,
+.MuiDrawer-root *,
+.MuiAppBar-root,
+.MuiAppBar-root *,
+.MuiToolbar-root,
+.MuiToolbar-root * {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove focus outline from form elements */
+.MuiFormControl-root,
+.MuiFormControl-root *,
+.MuiTextField-root,
+.MuiTextField-root *,
+.MuiSelect-root,
+.MuiSelect-root *,
+.MuiInputBase-root,
+.MuiInputBase-root * {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove blue focus outline from all sidebar buttons and elements */
+.MuiDrawer-root,
+.MuiDrawer-root *,
+.MuiDrawer-root .MuiIconButton-root,
+.MuiDrawer-root .MuiIconButton-root:focus,
+.MuiDrawer-root .MuiIconButton-root:focus-visible,
+.MuiDrawer-root .MuiIconButton-root:focus-within,
+.MuiDrawer-root .MuiButton-root,
+.MuiDrawer-root .MuiButton-root:focus,
+.MuiDrawer-root .MuiButton-root:focus-visible,
+.MuiDrawer-root .MuiButton-root:focus-within,
+.MuiDrawer-root .MuiListItem-root,
+.MuiDrawer-root .MuiListItem-root:focus,
+.MuiDrawer-root .MuiListItem-root:focus-visible,
+.MuiDrawer-root .MuiListItem-root:focus-within,
+.MuiDrawer-root .MuiListItemButton-root,
+.MuiDrawer-root .MuiListItemButton-root:focus,
+.MuiDrawer-root .MuiListItemButton-root:focus-visible,
+.MuiDrawer-root .MuiListItemButton-root:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove focus outline from sidebar-specific elements */
+.MuiDrawer-root .MuiTooltip-root,
+.MuiDrawer-root .MuiTooltip-root *,
+.MuiDrawer-root .MuiMenu-root,
+.MuiDrawer-root .MuiMenu-root *,
+.MuiDrawer-root .MuiMenuItem-root,
+.MuiDrawer-root .MuiMenuItem-root:focus,
+.MuiDrawer-root .MuiMenuItem-root:focus-visible,
+.MuiDrawer-root .MuiMenuItem-root:focus-within,
+.MuiDrawer-root .MuiDialog-root,
+.MuiDrawer-root .MuiDialog-root *,
+.MuiDrawer-root .MuiDialogTitle-root,
+.MuiDrawer-root .MuiDialogContent-root,
+.MuiDrawer-root .MuiDialogActions-root {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove focus outline from right sidebar elements */
+.MuiBox-root .MuiIconButton-root,
+.MuiBox-root .MuiIconButton-root:focus,
+.MuiBox-root .MuiIconButton-root:focus-visible,
+.MuiBox-root .MuiIconButton-root:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove focus outline from all clickable elements in sidebars */
+.MuiDrawer-root [role="button"],
+.MuiDrawer-root [role="button"]:focus,
+.MuiDrawer-root [role="button"]:focus-visible,
+.MuiDrawer-root [role="button"]:focus-within,
+.MuiDrawer-root [tabindex],
+.MuiDrawer-root [tabindex]:focus,
+.MuiDrawer-root [tabindex]:focus-visible,
+.MuiDrawer-root [tabindex]:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove focus outline from right sidebar toggle buttons and elements */
+.MuiBox-root [role="button"],
+.MuiBox-root [role="button"]:focus,
+.MuiBox-root [role="button"]:focus-visible,
+.MuiBox-root [role="button"]:focus-within,
+.MuiBox-root [tabindex],
+.MuiBox-root [tabindex]:focus,
+.MuiBox-root [tabindex]:focus-visible,
+.MuiBox-root [tabindex]:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Remove focus outline from all clickable elements in the main chat area */
+.MuiBox-root .MuiIconButton-root,
+.MuiBox-root .MuiIconButton-root:focus,
+.MuiBox-root .MuiIconButton-root:focus-visible,
+.MuiBox-root .MuiIconButton-root:focus-within,
+.MuiBox-root [onClick],
+.MuiBox-root [onClick]:focus,
+.MuiBox-root [onClick]:focus-visible,
+.MuiBox-root [onClick]:focus-within {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+.message-actions-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    gap: 4px;
+    margin-top: 3px;
+} 

@@ -1,0 +1,143 @@
+/* -----------------------------------
+   1) GRID LAYOUT
+------------------------------------ */
+.flashcards-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 cards per row */
+  gap: 1.5rem;
+  padding: 2rem;
+}
+
+/* Sidebar-specific grid layout */
+.flashcards-grid-sidebar {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 cards per row for sidebar too */
+  gap: 0.75rem;
+  padding: 0.5rem;
+}
+
+/* -----------------------------------
+   2) CARD PERSPECTIVE & HOVER LIFT
+------------------------------------ */
+.flashcard {
+  perspective: 1000px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.flashcard:hover {
+  transform: translateY(-6px);
+}
+
+/* -----------------------------------
+   3) INNER FLIP CONTAINER
+------------------------------------ */
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 380px; /* Slightly reduced from 400px */
+  transform-style: preserve-3d;
+  transition: transform 0.6s ease-in-out;
+}
+.flashcard.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+/* Sidebar-specific card sizing */
+.flashcards-grid-sidebar .card-inner {
+  min-height: 450px; /* Made flashcards much bigger */
+}
+
+/* -----------------------------------
+   4) BOTH FACES
+------------------------------------ */
+.card-face {
+  position: absolute;
+  width: 100%; /* Reverted from 120% */
+  height: 100%; /* Reverted from 175% */
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.card-front { z-index: 2; }
+.card-back {
+  transform: rotateY(180deg);
+  background: #ffffff;
+}
+
+/* -----------------------------------
+   5) HEADER—RIBBON + PILL
+------------------------------------ */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+}
+.ribbon {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 0 0 8px 8px;
+  background: #000000 !important;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.ribbon.subject {
+  background: #000000 !important;
+}
+.ribbon.answer {
+  background: #000000 !important;
+}
+.card-face .ribbon {
+  background: #000000 !important;
+}
+.card-front .ribbon {
+  background: #000000 !important;
+}
+.card-back .ribbon {
+  background: #000000 !important;
+}
+.pill {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: #000000;
+  background: #ffffff;
+  border: 1px solid #000000;
+}
+.pill.difficulty.easy {
+  background: #ffffff;
+  color: #000000;
+}
+.pill.difficulty.medium, .pill.difficulty.intermediate { /* Added .intermediate to map to medium style */
+  background: #ffffff;
+  color: #000000;
+}
+.pill.difficulty.hard {
+  background: #ffffff;
+  color: #000000;
+}
+
+/* -----------------------------------
+   6) BODY TEXT
+------------------------------------ */
+.card-body {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transform: translateY(-40px);
+}

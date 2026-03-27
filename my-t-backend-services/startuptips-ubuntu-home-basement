@@ -1,0 +1,6 @@
+# for backend
+export PYTHONPATH="$(pwd)"
+python app/main.py
+
+#for frontend
+npm start

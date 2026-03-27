@@ -1,0 +1,6 @@
+2025-08-06 20:18:52 | INFO     | config.py:app.core.config:77 - Current directory --> /Users/kethandosapati/Developer/startup/backend/base-ai-backend-001/app
+2025-08-06 20:18:52 | INFO     | config.py:app.core.config:81 - Using env file: .env.local
+2025-08-06 20:18:52 | WARNING  | config.py:app.core.config:84 - Environment file .env.local not found. Defaults may be used.
+2025-08-06 20:19:32 | INFO     | config.py:app.core.config:77 - Current directory --> /Users/kethandosapati/Developer/startup/backend/base-ai-backend-001/app
+2025-08-06 20:19:32 | INFO     | config.py:app.core.config:81 - Using env file: .env.local
+2025-08-06 20:19:32 | WARNING  | config.py:app.core.config:84 - Environment file .env.local not found. Defaults may be used.
