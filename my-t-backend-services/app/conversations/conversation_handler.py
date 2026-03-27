@@ -7,7 +7,8 @@ import asyncio
 from app.core.response.generative_responder import GenerativeResponder
 from app.logger.app_logger import app_logger
 
-CONV_DATA_DIR = os.path.join(os.path.dirname(__file__), 'data')
+_default_conv_dir = os.path.join(os.path.dirname(__file__), 'data')
+CONV_DATA_DIR = _default_conv_dir if os.access(os.path.dirname(__file__), os.W_OK) else '/tmp/conversations/data'
 os.makedirs(CONV_DATA_DIR, exist_ok=True)
 
 def _now():
