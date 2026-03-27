@@ -1,13 +1,13 @@
 import os
 import logging
 import sys
-from datetime import datetime
 from loguru import logger
 from typing import Any
 import re
 
-# Ensure the logs directory exists
-os.makedirs("logs", exist_ok=True)
+# Ensure the logs directory exists (use /tmp on read-only filesystems like Vercel)
+_logs_dir = "/tmp/logs" if not os.access(".", os.W_OK) else "logs"
+os.makedirs(_logs_dir, exist_ok=True)
 
 def format_log_message(record):
     """Extract class name from message and format it properly with fixed width"""
@@ -30,24 +30,7 @@ def format_log_message(record):
         record["extra"]["class_name_separator"] = " | "
         return False
 
-def get_custom_log_filename():
-    """Generate custom log filename: logs_on_sep_11_25_time_14_30_45.log"""
-    now = datetime.now()
-    month_names = {
-        1: "jan", 2: "feb", 3: "mar", 4: "apr", 5: "may", 6: "jun",
-        7: "jul", 8: "aug", 9: "sep", 10: "oct", 11: "nov", 12: "dec"
-    }
-    month = month_names[now.month]
-    day = now.day
-    year = str(now.year)[2:]  # Last 2 digits of year
-    hour = now.hour
-    minute = now.minute
-    second = now.second
-    
-    return f"logs/logs_on_{month}_{day:02d}_{year}_{hour:02d}_{minute:02d}_{second:02d}.log"
-
-# Define log file path with custom naming
-LOG_FILE = get_custom_log_filename()
+LOG_FILE = f"{_logs_dir}/app.log"
 
 # Remove default Loguru handler to avoid duplicates
 logger.remove()
