@@ -11,6 +11,7 @@ class AppEnvironment(str, Enum):
     DEV = "dev"
     QA = "qa"
     PROD = "prod"
+    VERCEL_01 = "vercel-01"
 
 
 class Settings(BaseSettings):
@@ -72,7 +73,7 @@ class Settings(BaseSettings):
     @property
     def ENVIRONMENT(self) -> AppEnvironment:
         """Returns the app environment."""
-        return AppEnvironment[os.getenv("AI_ENV", default="local").upper()]
+        return AppEnvironment(os.getenv("AI_ENV", default="local").lower())
 
     @property
     def UVICORN_WORKER_COUNT(self) -> int:
