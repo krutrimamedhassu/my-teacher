@@ -1,0 +1,25 @@
+# Logs
+logs/
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+.env.*
+!.env.example
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# Node
+node_modules/
+package-lock.json
+
+# Misc
+.DS_Store
+.idea/
+*.sqlite
