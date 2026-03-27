@@ -57,7 +57,7 @@ class Settings(BaseSettings):
     LOGFIRE_TOKEN: Optional[str] = None
 
     # Server settings
-    PORT: int
+    PORT: Optional[int]
 
     # LLM settings for generate_text in GenerativeResponder
     MAX_TOKENS_GEN_TEXT: int

@@ -45,7 +45,9 @@ app.add_middleware(
 ) # CORS middleware to allow cross-origin requests
 
 # Mount static files
-app.mount("/static", StaticFiles(directory="static"), name="static")
+_static_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static")
+if os.path.exists(_static_dir):
+    app.mount("/static", StaticFiles(directory=_static_dir), name="static")
 
 app.include_router(api_router, prefix=f"{settings.API_PREFIX}/v1")
 
