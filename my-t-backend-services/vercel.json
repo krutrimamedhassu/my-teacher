@@ -1,4 +1,5 @@
 {
+  "ignoreCommand": "if [ \"$VERCEL_GIT_COMMIT_REF\" = \"feature/vercel-01\" ]; then exit 1; else exit 0; fi",
   "rewrites": [
     { "source": "/(.*)", "destination": "/api/index" }
   ],
