@@ -228,11 +228,10 @@ async def add_document_to_conversation(
 async def get_conversation_documents(conversation_id: str, request: Request = None):
     app_logger.log_info(f"[ConversationsAPI] get_conversation_documents {conversation_id}")
     try:
-        from app.core.auth.optional_auth import require_auth_with_usage_tracking
+        from app.core.auth.auth_dependency import get_current_user
         from app.core.data.document_store import document_store
-        user_id, identifier, usage_info, response_headers = await require_auth_with_usage_tracking(
-            request, "conversation_get_documents"
-        )
+        user = await get_current_user(request)
+        user_id = str(user.get('_id') or user.get('user_id') or user.get('id'))
         conversation = ConversationManager.get_conversation(conversation_id)
         if conversation.get('user_id') != user_id:
             raise HTTPException(status_code=403, detail="Access denied")
@@ -250,7 +249,6 @@ async def get_conversation_documents(conversation_id: str, request: Request = No
         return JSONResponse(
             status_code=200,
             content=jsonable_encoder({"conversation_id": conversation_id, "documents": enriched_docs, "total_count": len(enriched_docs)}),
-            headers=response_headers
         )
     except HTTPException:
         raise
