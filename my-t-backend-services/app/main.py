@@ -34,7 +34,7 @@ _cors_origins_env = os.getenv("BACKEND_CORS_ORIGINS", "")
 _cors_origins = (
     [o.strip() for o in _cors_origins_env.split(",") if o.strip()]
     if _cors_origins_env
-    else ["http://localhost:4000", "http://localhost:3000", "http://127.0.0.1:4000", "http://127.0.0.1:3000", "http://localhost:9000"]
+    else ["http://localhost:4000", "http://localhost:3000", "http://127.0.0.1:4000", "http://127.0.0.1:3000", "http://localhost:9000", "https://my-teacher-ai.vercel.app"]
 )
 
 app.add_middleware(
