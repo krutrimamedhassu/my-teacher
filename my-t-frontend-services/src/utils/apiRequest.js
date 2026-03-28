@@ -8,7 +8,7 @@ const API_BASE_URL = (function resolveBaseUrl() {
   if (env.NODE_ENV === 'development') {
     return '/api/v1';
   }
-  return env.REACT_APP_API_BASE_URL || '/api/v1';
+  return env.REACT_APP_API_BASE_URL || 'https://my-teacher-backend.vercel.app/api/v1';
 })();
 
 export const TokenManager = {
