@@ -15,7 +15,7 @@ PyJWT
 email-validator
 google-search-results
 passlib[bcrypt]
-bcrypt
+bcrypt==3.2.2
 websockets
 gtts
 logfire[fastapi]
