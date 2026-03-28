@@ -122,7 +122,7 @@ async def upload_file(
                 # Link to conversation
                 app_logger.log_debug(f"[Upload] Attempting to link document to conversation: {conversation_id}")
                 try:
-                    from app.conversations.conversation_handler import ConversationManager
+                    from app.context_store.conversation_store import ConversationManager
                     # Verify user has access to conversation
                     conversation = ConversationManager.get_conversation(conversation_id)
                     if conversation.get('user_id') == user_id:
@@ -242,7 +242,7 @@ async def upload_multiple_files(
         app_logger.log_debug(f"[Upload] Verifying access to conversation: {conversation_id}")
         conversation_access = None
         try:
-            from app.conversations.conversation_handler import ConversationManager
+            from app.context_store.conversation_store import ConversationManager
             conversation = ConversationManager.get_conversation(conversation_id)
             if conversation.get('user_id') == user_id:
                 conversation_access = True

@@ -3,7 +3,7 @@ Conversation storage backed by MongoDB.
 Replaces the old file-based conversation_handler.
 """
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 import asyncio
 from app.context_store.mongo_client import get_db
@@ -295,3 +295,38 @@ class ConversationManager:
         except Exception as e:
             app_logger.log_error(f"[ConversationManager] Error in update_document_reference_in_messages: {e}")
             return 0
+
+    @staticmethod
+    def cleanup_expired_conversations() -> Dict[str, int]:
+        """
+        Hard-delete expired conversations:
+        - Anonymous (user_id is None): older than 24 hours
+        - Logged-in users: not updated in the last 30 days
+        """
+        app_logger.log_info("[ConversationManager] Running cleanup_expired_conversations")
+        try:
+            col = _col()
+            now = datetime.utcnow()
+
+            anon_cutoff = now - timedelta(hours=24)
+            anon_result = col.delete_many({
+                'user_id': None,
+                'created_at': {'$lt': anon_cutoff.isoformat()}
+            })
+
+            user_cutoff = now - timedelta(days=30)
+            user_result = col.delete_many({
+                'user_id': {'$ne': None},
+                'updated_at': {'$lt': user_cutoff.isoformat()}
+            })
+
+            summary = {
+                'anonymous_deleted': anon_result.deleted_count,
+                'user_deleted': user_result.deleted_count,
+                'total_deleted': anon_result.deleted_count + user_result.deleted_count
+            }
+            app_logger.log_info(f"[ConversationManager] Cleanup complete: {summary}")
+            return summary
+        except Exception as e:
+            app_logger.log_error(f"[ConversationManager] Error in cleanup_expired_conversations: {e}")
+            raise

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Body, Query, Path, Request
 from fastapi.responses import JSONResponse
 from typing import Optional, List, Any
-from app.conversations.conversation_handler import ConversationManager
+from app.context_store.conversation_store import ConversationManager
 from fastapi.encoders import jsonable_encoder
 from app.logger.app_logger import app_logger
 
@@ -102,6 +102,17 @@ async def delete_empty_conversations(http_request: Request) -> JSONResponse:
         return JSONResponse(status_code=200, content=result, headers=response_headers)
     except Exception as e:
         app_logger.log_error(f"[ConversationsAPI] Error in delete_empty_conversations: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/cleanup", summary="Delete expired conversations (cron job)")
+def cleanup_conversations():
+    app_logger.log_info("[ConversationsAPI] cleanup_conversations")
+    try:
+        result = ConversationManager.cleanup_expired_conversations()
+        return result
+    except Exception as e:
+        app_logger.log_error(f"[ConversationsAPI] Error in cleanup_conversations: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
