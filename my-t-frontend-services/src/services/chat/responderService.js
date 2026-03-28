@@ -34,9 +34,10 @@ export const callResponderAPI = async (input, conversation_id, apiKey = null) =>
   
   // If API key is provided, use it for authentication instead of Bearer token
   if (apiKey) {
-    const url = `${process.env.NODE_ENV === 'production' 
-      ? `${process.env.REACT_APP_BASE_BACKEND_URL}/api/v1`
-      : '/api/v1'}/responder/`;
+    const API_BASE = process.env.NODE_ENV === 'production'
+      ? (process.env.REACT_APP_API_BASE_URL || '/api/v1')
+      : '/api/v1';
+    const url = `${API_BASE}/responder/`;
     
     const headers = {
       'Content-Type': 'application/json',
