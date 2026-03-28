@@ -367,7 +367,7 @@ class GenerativeResponder:
         app_logger.log_debug(f"[GenerativeResponder] Model: {model or settings.DEFAULT_MODEL}")
 
         try:
-            from app.conversations.conversation_handler import ConversationManager
+            from app.context_store.conversation_store import ConversationManager
 
             app_logger.log_debug(f"[GenerativeResponder] Fetching conversation history for: {conversation_id}")
             conv = ConversationManager.get_conversation(conversation_id)

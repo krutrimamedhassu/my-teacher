@@ -155,7 +155,7 @@ class ContextManager:
         """
         app_logger.log_debug(f"[ContextManager] Retrieving conversation history for: {conversation_id}")
         try:
-            from app.conversations.conversation_handler import ConversationManager
+            from app.context_store.conversation_store import ConversationManager
             conv = ConversationManager.get_conversation(conversation_id)
             history = conv.get("messages", [])
 
@@ -196,7 +196,7 @@ class ContextManager:
             Formatted context string or None if no context available
         """
         try:
-            from app.conversations.conversation_handler import ConversationManager
+            from app.context_store.conversation_store import ConversationManager
             conv = ConversationManager.get_conversation(conversation_id)
             messages = conv.get('messages', [])
             
@@ -239,7 +239,7 @@ class ContextManager:
             Formatted content string or None if no content available
         """
         try:
-            from app.conversations.conversation_handler import ConversationManager
+            from app.context_store.conversation_store import ConversationManager
             conv = ConversationManager.get_conversation(conversation_id)
             messages = conv.get('messages', [])
             

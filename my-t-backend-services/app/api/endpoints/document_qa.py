@@ -27,7 +27,7 @@ def get_last_uploaded_document_id(conversation_id: str) -> Optional[str]:
 
     try:
         app_logger.log_debug("[DocumentQA] Importing ConversationManager")
-        from app.conversations.conversation_handler import ConversationManager
+        from app.context_store.conversation_store import ConversationManager
 
         app_logger.log_debug(f"[DocumentQA] Retrieving conversation: {conversation_id}")
         conv = ConversationManager.get_conversation(conversation_id)
@@ -72,7 +72,7 @@ def get_recent_uploaded_document_ids(conversation_id: str, limit: int = 5) -> Li
     ids: List[str] = []
     try:
         app_logger.log_debug("[DocumentQA] Importing ConversationManager for recent uploads")
-        from app.conversations.conversation_handler import ConversationManager
+        from app.context_store.conversation_store import ConversationManager
 
         app_logger.log_debug(f"[DocumentQA] Retrieving conversation for recent uploads: {conversation_id}")
         conv = ConversationManager.get_conversation(conversation_id)
