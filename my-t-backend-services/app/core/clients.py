@@ -1,29 +1,13 @@
-from pymongo import MongoClient
-from pymongo.server_api import ServerApi
 import openai
-# import serpapi
 from app.core.config import settings
 from app.logger.app_logger import app_logger
+from app.context_store.mongo_client import get_client as _get_mongo_client
 
 
 class MongoDBClient:
+    """Thin wrapper kept for backward compatibility. Use app.context_store.mongo_client directly."""
     def __init__(self, uri: str = None):
-        """
-        Initialize MongoDB connection client.
-        """
-        self.uri = uri or settings.MONGODB_URI
-        try:
-            app_logger.log_info(f"[Clients] Initializing MongoDB connection")
-            # Hide sensitive URI parts for logging
-            uri_preview = self.uri.split('@')[-1] if '@' in self.uri else self.uri[:50] + '...'
-            app_logger.log_debug(f"[Clients] Connecting to MongoDB: {uri_preview}")
-
-            self.client = MongoClient(self.uri, server_api=ServerApi('1'))
-            self.client.admin.command('ping')
-            app_logger.log_info("[Clients] Successfully connected to MongoDB")
-        except Exception as e:
-            app_logger.log_error(f"[Clients] Connection failed to MongoDB: {e}")
-            raise ConnectionError(f"Failed to connect to MongoDB: {e}")
+        self.client = _get_mongo_client()
 
 
 # # Instantiate the SerpAPI client with the API key from settings

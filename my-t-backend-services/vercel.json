@@ -5,5 +5,8 @@
   ],
   "env": {
     "AI_ENV": "vercel-01"
-  }
+  },
+  "crons": [
+    { "path": "/api/v1/conversations/cleanup", "schedule": "0 2 * * *" }
+  ]
 }

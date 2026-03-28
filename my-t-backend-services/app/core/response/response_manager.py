@@ -337,7 +337,7 @@ class ResponseManager:
     async def _get_conversation_context(self, conversation_id: str, message_count: int) -> Optional[str]:
         """Get conversation context as formatted string."""
         try:
-            from app.conversations.conversation_handler import ConversationManager
+            from app.context_store.conversation_store import ConversationManager
             conv = ConversationManager.get_conversation(conversation_id)
             messages = conv.get('messages', [])
             
@@ -361,7 +361,7 @@ class ResponseManager:
     async def _get_conversation_content(self, conversation_id: str, message_count: int) -> Optional[str]:
         """Get conversation content for QA generation."""
         try:
-            from app.conversations.conversation_handler import ConversationManager
+            from app.context_store.conversation_store import ConversationManager
             conv = ConversationManager.get_conversation(conversation_id)
             messages = conv.get('messages', [])
             
