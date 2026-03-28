@@ -1,5 +1,3 @@
-import os
-import json
 import uuid
 from datetime import datetime
 from typing import Optional, List, Dict, Any
@@ -7,29 +5,24 @@ import asyncio
 from app.core.response.generative_responder import GenerativeResponder
 from app.logger.app_logger import app_logger
 
-_default_conv_dir = os.path.join(os.path.dirname(__file__), 'data')
-CONV_DATA_DIR = _default_conv_dir if os.access(os.path.dirname(__file__), os.W_OK) else '/tmp/conversations/data'
-os.makedirs(CONV_DATA_DIR, exist_ok=True)
 
 def _now():
-    app_logger.log_debug("[ConversationManager] Getting current UTC timestamp")
-    result = datetime.utcnow().isoformat()
-    app_logger.log_debug(f"[ConversationManager] Generated timestamp: {result}")
-    return result
+    return datetime.utcnow().isoformat()
 
-def _conv_path(conversation_id: str) -> str:
-    app_logger.log_debug(f"[ConversationManager] Generating path for conversation_id: {conversation_id}")
-    path = os.path.join(CONV_DATA_DIR, f'{conversation_id}.json')
-    app_logger.log_debug(f"[ConversationManager] Generated path: {path}")
-    return path
+
+def _get_col():
+    """Get the MongoDB conversations collection, reusing the existing db_manager connection."""
+    from app.core.data.database import db_manager
+    return db_manager.db['conversations']
+
 
 class ConversationManager:
+
     @staticmethod
     def create_conversation(user_id: Optional[str] = None, username: Optional[str] = None, title: Optional[str] = None) -> Dict[str, Any]:
-        app_logger.log_info(f"[ConversationManager] Starting create_conversation for user_id: {user_id}, username: {username}, title: {title}")
+        app_logger.log_info(f"[ConversationManager] create_conversation user_id={user_id}")
         try:
             conversation_id = str(uuid.uuid4())
-            app_logger.log_debug(f"[ConversationManager] Generated conversation_id: {conversation_id}")
             now = _now()
             conversation = {
                 'conversation_id': conversation_id,
@@ -43,21 +36,19 @@ class ConversationManager:
                 'last_message_preview': '',
                 'messages': []
             }
-            with open(_conv_path(conversation_id), 'w') as f:
-                json.dump(conversation, f, indent=2)
-            app_logger.log_info(f"[ConversationManager] Successfully created conversation with ID: {conversation_id}")
+            _get_col().insert_one({**conversation})
+            app_logger.log_info(f"[ConversationManager] Created conversation {conversation_id}")
             return conversation
         except Exception as e:
-            app_logger.log_error(f"[ConversationManager] Error in create_conversation: {str(e)}")
+            app_logger.log_error(f"[ConversationManager] Error in create_conversation: {e}")
             raise
 
     @staticmethod
     def create_conversation_with_id(conversation_id: Optional[str] = None, user_id: Optional[str] = None, username: Optional[str] = None, title: Optional[str] = None) -> Dict[str, Any]:
-        app_logger.log_info(f"[ConversationManager] Starting create_conversation_with_id for conversation_id: {conversation_id}, user_id: {user_id}, username: {username}, title: {title}")
+        app_logger.log_info(f"[ConversationManager] create_conversation_with_id conversation_id={conversation_id}")
         try:
             if conversation_id is None:
                 conversation_id = str(uuid.uuid4())
-                app_logger.log_debug(f"[ConversationManager] Generated new conversation_id: {conversation_id}")
             now = _now()
             conversation = {
                 'conversation_id': conversation_id,
@@ -71,24 +62,22 @@ class ConversationManager:
                 'last_message_preview': '',
                 'messages': []
             }
-            with open(_conv_path(conversation_id), 'w') as f:
-                json.dump(conversation, f, indent=2)
-            app_logger.log_info(f"[ConversationManager] Successfully created conversation with specific ID: {conversation_id}")
+            _get_col().insert_one({**conversation})
+            app_logger.log_info(f"[ConversationManager] Created conversation with ID {conversation_id}")
             return conversation
         except Exception as e:
-            app_logger.log_error(f"[ConversationManager] Error in create_conversation_with_id: {str(e)}")
+            app_logger.log_error(f"[ConversationManager] Error in create_conversation_with_id: {e}")
             raise
 
     @staticmethod
     def append_message(conversation_id: str, sender_id: Optional[str], sender_username: Optional[str], role: str, text: str, attachments: Optional[List[Any]] = None, sidebar_info: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
-        app_logger.log_info(f"[ConversationManager] Starting append_message for conversation_id: {conversation_id}, sender_id: {sender_id}, role: {role}")
+        app_logger.log_info(f"[ConversationManager] append_message conversation_id={conversation_id} role={role}")
         try:
-            path = _conv_path(conversation_id)
-            if not os.path.exists(path):
-                app_logger.log_error(f"[ConversationManager] Conversation not found at path: {path}")
+            col = _get_col()
+            conv = col.find_one({'conversation_id': conversation_id, 'deleted': False}, {'_id': 0})
+            if not conv:
                 raise FileNotFoundError('Conversation not found')
-            with open(path, 'r') as f:
-                conversation = json.load(f)
+
             message = {
                 'message_id': str(uuid.uuid4()),
                 'conversation_id': conversation_id,
@@ -99,132 +88,145 @@ class ConversationManager:
                 'attachments': attachments or [],
                 'timestamp': _now()
             }
-            # Store sidebar_info as a nested field if provided
             if sidebar_info:
                 message['sidebar_info'] = sidebar_info
-            conversation['messages'].append(message)
-            conversation['updated_at'] = message['timestamp']
-            conversation['last_message_preview'] = text[:100]
-            # Auto-name the conversation on the first message using AI
-            if len(conversation['messages']) == 1:
+
+            now = _now()
+            set_fields = {
+                'updated_at': now,
+                'last_message_preview': text[:100]
+            }
+
+            # Auto-title on first message
+            if len(conv.get('messages', [])) == 0:
                 try:
-                    loop = None
+                    async def _gen_title():
+                        async with GenerativeResponder() as r:
+                            return await r.generate_title(text)
                     try:
                         loop = asyncio.get_running_loop()
+                        title = loop.run_until_complete(_gen_title())
                     except RuntimeError:
-                        pass
-                    if loop and loop.is_running():
-                        # If already in an event loop (unlikely in sync context), create a new task
-                        async def generate_title_async():
-                            async with GenerativeResponder() as responder:
-                                return await responder.generate_title(text)
-                        title = loop.run_until_complete(generate_title_async())
-                    else:
-                        async def generate_title_async():
-                            async with GenerativeResponder() as responder:
-                                return await responder.generate_title(text)
-                        title = asyncio.run(generate_title_async())
-                    conversation['title'] = title
+                        title = asyncio.run(_gen_title())
+                    set_fields['title'] = title
                 except Exception:
-                    # Fallback: Use first 4 words or up to 30 chars
                     words = text.strip().split()
-                    title = ' '.join(words[:4])
-                    if len(title) > 30:
-                        title = title[:27] + '...'
-                    conversation['title'] = title
-                    app_logger.log_info(f"[ConversationManager] Auto-generated conversation title: {title}")
-            with open(path, 'w') as f:
-                json.dump(conversation, f, indent=2)
-            app_logger.log_info(f"[ConversationManager] Successfully appended message to conversation {conversation_id}")
+                    t = ' '.join(words[:4])
+                    set_fields['title'] = t[:27] + '...' if len(t) > 30 else t
+
+            col.update_one(
+                {'conversation_id': conversation_id},
+                {'$push': {'messages': message}, '$set': set_fields}
+            )
+            app_logger.log_info(f"[ConversationManager] Appended message to {conversation_id}")
             return message
         except Exception as e:
-            app_logger.log_error(f"[ConversationManager] Error in append_message: {str(e)}")
+            app_logger.log_error(f"[ConversationManager] Error in append_message: {e}")
             raise
 
     @staticmethod
     def get_conversation(conversation_id: str) -> Dict[str, Any]:
-        app_logger.log_info(f"[ConversationManager] Starting get_conversation for conversation_id: {conversation_id}")
+        app_logger.log_info(f"[ConversationManager] get_conversation {conversation_id}")
         try:
-            path = _conv_path(conversation_id)
-            if not os.path.exists(path):
-                app_logger.log_error(f"[ConversationManager] Conversation not found at path: {path}")
+            conv = _get_col().find_one({'conversation_id': conversation_id, 'deleted': False}, {'_id': 0})
+            if not conv:
                 raise FileNotFoundError('Conversation not found')
-            with open(path, 'r') as f:
-                conversation = json.load(f)
-            app_logger.log_info(f"[ConversationManager] Successfully retrieved conversation {conversation_id}")
-            return conversation
+            return conv
         except Exception as e:
-            app_logger.log_error(f"[ConversationManager] Error in get_conversation: {str(e)}")
+            app_logger.log_error(f"[ConversationManager] Error in get_conversation: {e}")
+            raise
+
+    @staticmethod
+    def edit_conversation(conversation_id: str, title: Optional[str] = None, is_active: Optional[bool] = None) -> Dict[str, Any]:
+        app_logger.log_info(f"[ConversationManager] edit_conversation {conversation_id}")
+        try:
+            col = _get_col()
+            conv = col.find_one({'conversation_id': conversation_id, 'deleted': False}, {'_id': 0})
+            if not conv:
+                raise FileNotFoundError('Conversation not found')
+            set_fields: Dict[str, Any] = {'updated_at': _now()}
+            if title is not None:
+                set_fields['title'] = title
+            if is_active is not None:
+                set_fields['is_active'] = is_active
+            col.update_one({'conversation_id': conversation_id}, {'$set': set_fields})
+            conv.update(set_fields)
+            return conv
+        except Exception as e:
+            app_logger.log_error(f"[ConversationManager] Error in edit_conversation: {e}")
+            raise
+
+    @staticmethod
+    def delete_conversation(conversation_id: str) -> Dict[str, Any]:
+        """Soft-delete a conversation."""
+        app_logger.log_info(f"[ConversationManager] delete_conversation {conversation_id}")
+        try:
+            col = _get_col()
+            conv = col.find_one({'conversation_id': conversation_id}, {'_id': 0})
+            if not conv:
+                raise FileNotFoundError('Conversation not found')
+            set_fields = {'deleted': True, 'is_active': False, 'updated_at': _now()}
+            col.update_one({'conversation_id': conversation_id}, {'$set': set_fields})
+            conv.update(set_fields)
+            return conv
+        except Exception as e:
+            app_logger.log_error(f"[ConversationManager] Error in delete_conversation: {e}")
             raise
 
     @staticmethod
     def list_conversations_for_user(user_id: str) -> List[Dict[str, Any]]:
-        app_logger.log_info(f"[ConversationManager] Starting list_conversations_for_user for user_id: {user_id}")
+        app_logger.log_info(f"[ConversationManager] list_conversations_for_user {user_id}")
         try:
-            conversations = []
-            for fname in os.listdir(CONV_DATA_DIR):
-                if fname.endswith('.json'):
-                    with open(os.path.join(CONV_DATA_DIR, fname), 'r') as f:
-                        conv = json.load(f)
-                        if conv.get('user_id') == user_id and not conv.get('deleted', False):
-                            conversations.append({
-                                'conversation_id': conv['conversation_id'],
-                                'title': conv.get('title', ''),
-                                'created_at': conv['created_at'],
-                                'updated_at': conv['updated_at'],
-                                'last_message_preview': conv.get('last_message_preview', ''),
-                                'is_active': conv.get('is_active', True)
-                            })
-            result = sorted(conversations, key=lambda x: x['updated_at'], reverse=True)
-            app_logger.log_info(f"[ConversationManager] Successfully retrieved {len(result)} conversations for user {user_id}")
+            cursor = _get_col().find(
+                {'user_id': user_id, 'deleted': False},
+                {'_id': 0, 'conversation_id': 1, 'title': 1, 'created_at': 1, 'updated_at': 1, 'last_message_preview': 1, 'is_active': 1}
+            ).sort('updated_at', -1)
+            result = list(cursor)
+            app_logger.log_info(f"[ConversationManager] Found {len(result)} conversations for user {user_id}")
             return result
         except Exception as e:
-            app_logger.log_error(f"[ConversationManager] Error in list_conversations_for_user: {str(e)}")
+            app_logger.log_error(f"[ConversationManager] Error in list_conversations_for_user: {e}")
             raise
 
     @staticmethod
     def list_conversations_anonymous() -> List[Dict[str, Any]]:
-        app_logger.log_info("[ConversationManager] Starting list_conversations_anonymous")
+        app_logger.log_info("[ConversationManager] list_conversations_anonymous")
         try:
-            conversations = []
-            for fname in os.listdir(CONV_DATA_DIR):
-                if fname.endswith('.json'):
-                    with open(os.path.join(CONV_DATA_DIR, fname), 'r') as f:
-                        conv = json.load(f)
-                        if not conv.get('user_id') and not conv.get('deleted', False):
-                            conversations.append({
-                                'conversation_id': conv['conversation_id'],
-                                'created_at': conv['created_at'],
-                                'updated_at': conv['updated_at'],
-                                'last_message_preview': conv.get('last_message_preview', ''),
-                                'is_active': conv.get('is_active', True)
-                            })
-            result = sorted(conversations, key=lambda x: x['updated_at'], reverse=True)
-            app_logger.log_info(f"[ConversationManager] Successfully retrieved {len(result)} anonymous conversations")
+            cursor = _get_col().find(
+                {'user_id': None, 'deleted': False},
+                {'_id': 0, 'conversation_id': 1, 'created_at': 1, 'updated_at': 1, 'last_message_preview': 1, 'is_active': 1}
+            ).sort('updated_at', -1)
+            result = list(cursor)
+            app_logger.log_info(f"[ConversationManager] Found {len(result)} anonymous conversations")
             return result
         except Exception as e:
-            app_logger.log_error(f"[ConversationManager] Error in list_conversations_anonymous: {str(e)}")
+            app_logger.log_error(f"[ConversationManager] Error in list_conversations_anonymous: {e}")
+            raise
+
+    @staticmethod
+    def delete_empty_conversations_for_user(user_id: str) -> Dict[str, Any]:
+        """Hard-delete all conversations with zero messages for a user."""
+        app_logger.log_info(f"[ConversationManager] delete_empty_conversations_for_user {user_id}")
+        try:
+            col = _get_col()
+            result = col.delete_many({'user_id': user_id, 'deleted': False, 'messages': {'$size': 0}})
+            deleted_count = result.deleted_count
+            app_logger.log_info(f"[ConversationManager] Deleted {deleted_count} empty conversations for user {user_id}")
+            return {'deleted_count': deleted_count}
+        except Exception as e:
+            app_logger.log_error(f"[ConversationManager] Error in delete_empty_conversations_for_user: {e}")
             raise
 
     @staticmethod
     def add_document_to_conversation(conversation_id: str, document_id: str, document_metadata: Dict[str, Any], user_id: str) -> bool:
-        """Add a document reference to a conversation"""
-        app_logger.log_info(f"[ConversationManager] Starting add_document_to_conversation for conversation_id: {conversation_id}, document_id: {document_id}, user_id: {user_id}")
+        app_logger.log_info(f"[ConversationManager] add_document_to_conversation {conversation_id} doc={document_id}")
         try:
-            path = _conv_path(conversation_id)
-            if not os.path.exists(path):
+            col = _get_col()
+            conv = col.find_one({'conversation_id': conversation_id}, {'_id': 0, 'documents': 1})
+            if not conv:
                 return False
-                
-            with open(path, 'r') as f:
-                conversation = json.load(f)
-            
-            if 'documents' not in conversation:
-                conversation['documents'] = []
-            
-            # Check if document already exists
-            if any(doc['document_id'] == document_id for doc in conversation['documents']):
+            if any(d['document_id'] == document_id for d in conv.get('documents', [])):
                 return False
-                
             doc_entry = {
                 'document_id': document_id,
                 'filename': document_metadata.get('filename', ''),
@@ -232,117 +234,84 @@ class ConversationManager:
                 'added_at': _now(),
                 'added_by': user_id
             }
-            
-            conversation['documents'].append(doc_entry)
-            conversation['updated_at'] = _now()
-            
-            with open(path, 'w') as f:
-                json.dump(conversation, f, indent=2)
-
-            app_logger.log_info(f"[ConversationManager] Successfully added document {document_id} to conversation {conversation_id}")
+            col.update_one(
+                {'conversation_id': conversation_id},
+                {'$push': {'documents': doc_entry}, '$set': {'updated_at': _now()}}
+            )
             return True
         except Exception as e:
-            app_logger.log_error(f"[ConversationManager] Error in add_document_to_conversation: {str(e)}")
+            app_logger.log_error(f"[ConversationManager] Error in add_document_to_conversation: {e}")
             return False
 
     @staticmethod
     def remove_document_from_conversation(conversation_id: str, document_id: str, cleanup_references: bool = True) -> int:
-        """Remove a document from conversation and optionally clean up references.
-        Returns the number of references cleaned up."""
-        app_logger.log_info(f"[ConversationManager] Starting remove_document_from_conversation for conversation_id: {conversation_id}, document_id: {document_id}, cleanup_references: {cleanup_references}")
+        app_logger.log_info(f"[ConversationManager] remove_document_from_conversation {conversation_id} doc={document_id}")
         try:
-            path = _conv_path(conversation_id)
-            if not os.path.exists(path):
+            col = _get_col()
+            conv = col.find_one({'conversation_id': conversation_id}, {'_id': 0})
+            if not conv:
                 return 0
-                
-            with open(path, 'r') as f:
-                conversation = json.load(f)
-            
-            # Remove from documents list
-            original_docs = conversation.get('documents', [])
-            conversation['documents'] = [doc for doc in original_docs if doc['document_id'] != document_id]
-            
-            references_cleaned = 0
-            if cleanup_references:
-                # Clean up message attachments and sidebar_info
-                for message in conversation.get('messages', []):
-                    # Clean attachments
-                    if 'attachments' in message and message['attachments']:
-                        original_count = len(message['attachments'])
-                        message['attachments'] = [
-                            att for att in message['attachments'] 
-                            if att.get('document_id') != document_id
-                        ]
-                        if len(message['attachments']) < original_count:
-                            references_cleaned += 1
-                    
-                    # Clean sidebar_info
-                    if 'sidebar_info' in message and message['sidebar_info']:
-                        if isinstance(message['sidebar_info'], dict):
-                            if message['sidebar_info'].get('document_id') == document_id:
-                                message['sidebar_info'] = None
-                                references_cleaned += 1
-            
-            conversation['updated_at'] = _now()
-            
-            with open(path, 'w') as f:
-                json.dump(conversation, f, indent=2)
 
-            app_logger.log_info(f"[ConversationManager] Successfully removed document {document_id} from conversation {conversation_id}, cleaned {references_cleaned} references")
+            references_cleaned = 0
+            set_fields: Dict[str, Any] = {'updated_at': _now()}
+
+            if cleanup_references:
+                messages = conv.get('messages', [])
+                for msg in messages:
+                    if msg.get('attachments'):
+                        orig = len(msg['attachments'])
+                        msg['attachments'] = [a for a in msg['attachments'] if a.get('document_id') != document_id]
+                        if len(msg['attachments']) < orig:
+                            references_cleaned += 1
+                    if isinstance(msg.get('sidebar_info'), dict) and msg['sidebar_info'].get('document_id') == document_id:
+                        msg['sidebar_info'] = None
+                        references_cleaned += 1
+                set_fields['messages'] = messages
+
+            col.update_one(
+                {'conversation_id': conversation_id},
+                {'$pull': {'documents': {'document_id': document_id}}, '$set': set_fields}
+            )
             return references_cleaned
         except Exception as e:
-            app_logger.log_error(f"[ConversationManager] Error in remove_document_from_conversation: {str(e)}")
+            app_logger.log_error(f"[ConversationManager] Error in remove_document_from_conversation: {e}")
             return 0
 
     @staticmethod
     def get_conversation_documents(conversation_id: str) -> List[Dict[str, Any]]:
-        """Get all documents associated with a conversation"""
-        app_logger.log_info(f"[ConversationManager] Starting get_conversation_documents for conversation_id: {conversation_id}")
         try:
-            conversation = ConversationManager.get_conversation(conversation_id)
-            documents = conversation.get('documents', [])
-            app_logger.log_info(f"[ConversationManager] Successfully retrieved {len(documents)} documents for conversation {conversation_id}")
-            return documents
+            conv = ConversationManager.get_conversation(conversation_id)
+            return conv.get('documents', [])
         except Exception as e:
-            app_logger.log_error(f"[ConversationManager] Error in get_conversation_documents: {str(e)}")
+            app_logger.log_error(f"[ConversationManager] Error in get_conversation_documents: {e}")
             return []
 
     @staticmethod
     def update_document_reference_in_messages(conversation_id: str, old_document_id: str, new_document_id: str) -> int:
-        """Update document references in messages when a document ID changes.
-        Returns the number of references updated."""
-        app_logger.log_info(f"[ConversationManager] Starting update_document_reference_in_messages for conversation_id: {conversation_id}, old_document_id: {old_document_id}, new_document_id: {new_document_id}")
+        app_logger.log_info(f"[ConversationManager] update_document_reference_in_messages {conversation_id}")
         try:
-            path = _conv_path(conversation_id)
-            if not os.path.exists(path):
+            col = _get_col()
+            conv = col.find_one({'conversation_id': conversation_id}, {'_id': 0})
+            if not conv:
                 return 0
-                
-            with open(path, 'r') as f:
-                conversation = json.load(f)
-            
-            references_updated = 0
-            for message in conversation.get('messages', []):
-                # Update attachments
-                if 'attachments' in message and message['attachments']:
-                    for attachment in message['attachments']:
-                        if attachment.get('document_id') == old_document_id:
-                            attachment['document_id'] = new_document_id
-                            references_updated += 1
-                
-                # Update sidebar_info
-                if 'sidebar_info' in message and message['sidebar_info']:
-                    if isinstance(message['sidebar_info'], dict):
-                        if message['sidebar_info'].get('document_id') == old_document_id:
-                            message['sidebar_info']['document_id'] = new_document_id
-                            references_updated += 1
-            
-            if references_updated > 0:
-                conversation['updated_at'] = _now()
-                with open(path, 'w') as f:
-                    json.dump(conversation, f, indent=2)
 
-            app_logger.log_info(f"[ConversationManager] Successfully updated {references_updated} document references in conversation {conversation_id}")
+            references_updated = 0
+            messages = conv.get('messages', [])
+            for msg in messages:
+                for att in msg.get('attachments', []):
+                    if att.get('document_id') == old_document_id:
+                        att['document_id'] = new_document_id
+                        references_updated += 1
+                if isinstance(msg.get('sidebar_info'), dict) and msg['sidebar_info'].get('document_id') == old_document_id:
+                    msg['sidebar_info']['document_id'] = new_document_id
+                    references_updated += 1
+
+            if references_updated > 0:
+                col.update_one(
+                    {'conversation_id': conversation_id},
+                    {'$set': {'messages': messages, 'updated_at': _now()}}
+                )
             return references_updated
         except Exception as e:
-            app_logger.log_error(f"[ConversationManager] Error in update_document_reference_in_messages: {str(e)}")
-            return 0 
+            app_logger.log_error(f"[ConversationManager] Error in update_document_reference_in_messages: {e}")
+            return 0
