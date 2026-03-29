@@ -82,7 +82,7 @@ const MessageBubble = ({ message, theme }) => {
       console.log('✅ MessageBubble: Audio playback completed');
     } catch (error) {
       console.error('❌ MessageBubble: TTS error:', error);
-      alert('Failed to play audio. Please try again.');
+      alert(`Failed to play audio. Please try again.\n${error.message}`);
     } finally {
       setIsPlayingAudio(false);
     }

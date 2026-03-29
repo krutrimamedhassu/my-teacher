@@ -2,14 +2,9 @@
  * API request helper and token manager
  */
 
-const API_BASE_URL = (function resolveBaseUrl() {
-  const env = (typeof process !== 'undefined' && process.env) || {};
-  // Force proxy in development to avoid CORS headaches
-  if (env.NODE_ENV === 'development') {
-    return '/api/v1';
-  }
-  return env.REACT_APP_API_BASE_URL || 'https://my-teacher-backend.vercel.app/api/v1';
-})();
+const API_BASE_URL = process.env.REACT_APP_BASE_BACKEND_URL
+  ? `${process.env.REACT_APP_BASE_BACKEND_URL}/api/v1`
+  : (process.env.REACT_APP_API_BASE_URL || 'https://my-teacher-backend.vercel.app/api/v1');
 
 export const TokenManager = {
   setTokens(accessToken, refreshToken) {
@@ -65,7 +60,6 @@ export const TokenManager = {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ refresh_token: refreshToken }),
-        credentials: 'include'
       });
       
       if (!response.ok) {
@@ -142,7 +136,6 @@ export async function apiRequest(path, method = 'GET', body = undefined, isFormD
       method,
       headers,
       body: fetchBody,
-      credentials: 'include'
     });
     console.log('🌐 apiRequest: Response received, status:', response.status);
   } catch (fetchError) {

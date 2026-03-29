@@ -173,8 +173,7 @@
 
     /* Tighter chat rail on smaller desktops */
     .chat-rail {
-        max-width: 650px !important;
-        width: 85vw !important;
+        width: 100% !important;
     }
 
     /* Reduce sidebar padding on smaller screens */
@@ -186,8 +185,7 @@
 /* Very small desktop screens where both sidebars cause issues */
 @media (min-width: 769px) and (max-width: 1024px) {
     .chat-rail {
-        max-width: 500px !important;
-        width: 80vw !important;
+        width: 100% !important;
         padding-top: 60px !important;
         padding-bottom: 80px !important;
     }
@@ -293,14 +291,9 @@
     font-weight: 600;
 }
 
-/* Chat rail centers all content and sets max width */
+/* Chat rail fills its parent; content inside is centered */
 .chat-rail {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: min(778px, calc(100% - 32px));
-    width: calc(100% - 32px);
+    width: 100%;
     padding-top: 70px;
     padding-bottom: 120px; /* Increased bottom padding to prevent last message from being covered by input */
     display: flex;
