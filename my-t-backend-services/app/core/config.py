@@ -11,7 +11,7 @@ class AppEnvironment(str, Enum):
     DEV = "dev"
     QA = "qa"
     PROD = "prod"
-    VERCEL_01 = "vercel-01"
+    VERCEL = "vercel"
 
 
 class Settings(BaseSettings):
