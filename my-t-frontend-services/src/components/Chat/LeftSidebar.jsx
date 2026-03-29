@@ -187,6 +187,7 @@ const LeftSidebar = ({
       <Box
         sx={{
           width: 48,
+          flexShrink: 0,
           height: '100vh',
           display: 'flex',
           flexDirection: 'column',
@@ -418,6 +419,7 @@ const LeftSidebar = ({
     <Box
       sx={{
         width: 260,
+        flexShrink: 0,
         height: '100vh',
         borderRight: `1px solid ${theme.palette.divider}`,
         display: 'flex',

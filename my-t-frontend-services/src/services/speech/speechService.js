@@ -51,10 +51,10 @@ export const convertTextToSpeech = async (text, voice = 'alloy') => {
       voice: voice
     };
 
-    // Get the API URL
-    const API_BASE_URL = process.env.NODE_ENV === 'production'
-      ? `${process.env.REACT_APP_BASE_BACKEND_URL}/api/v1`
-      : '/api/v1';
+    // Get the API URL (match apiRequest.js logic)
+    const API_BASE_URL = process.env.NODE_ENV === 'development'
+      ? '/api/v1'
+      : (process.env.REACT_APP_API_BASE_URL || 'https://my-teacher-backend.vercel.app/api/v1');
 
     const url = `${API_BASE_URL}/speech/tts`;
 
@@ -82,7 +82,6 @@ export const convertTextToSpeech = async (text, voice = 'alloy') => {
       method: 'POST',
       headers: headers,
       body: JSON.stringify(data),
-      credentials: 'include'
     });
 
     console.log('🔊 speechService: TTS response status:', response.status);
@@ -112,10 +111,10 @@ export const convertTextToSpeechStreaming = async (text, voice = 'alloy') => {
   console.log('🔊 speechService: Converting text to speech (STREAMING), length:', text.length, 'voice:', voice);
 
   try {
-    // Get the API URL
-    const API_BASE_URL = process.env.NODE_ENV === 'production'
-      ? `${process.env.REACT_APP_BASE_BACKEND_URL}/api/v1`
-      : '/api/v1';
+    // Get the API URL (match apiRequest.js logic)
+    const API_BASE_URL = process.env.NODE_ENV === 'development'
+      ? '/api/v1'
+      : (process.env.REACT_APP_API_BASE_URL || 'https://my-teacher-backend.vercel.app/api/v1');
 
     const url = `${API_BASE_URL}/speech/tts/stream`;
 
@@ -143,13 +142,17 @@ export const convertTextToSpeechStreaming = async (text, voice = 'alloy') => {
       method: 'POST',
       headers: headers,
       body: JSON.stringify({ text, voice }),
-      credentials: 'include'
     });
 
     console.log('🔊 speechService: Streaming TTS response status:', response.status);
 
     if (!response.ok) {
-      throw new Error(`Streaming TTS request failed with status ${response.status}`);
+      let errorDetail = '';
+      try {
+        const errorBody = await response.json();
+        errorDetail = errorBody.detail ? `: ${JSON.stringify(errorBody.detail)}` : '';
+      } catch (_) {}
+      throw new Error(`Streaming TTS request failed with status ${response.status}${errorDetail}`);
     }
 
     // Read the stream and collect chunks

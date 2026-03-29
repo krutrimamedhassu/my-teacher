@@ -30,12 +30,23 @@ logfire_client.instrument_fastapi(app)
 # Add structured logging middleware
 app.add_middleware(StructuredLoggingMiddleware)
 
+_LOCALHOST_ORIGINS = [
+    "http://localhost:9100", "http://127.0.0.1:9100",
+    "http://localhost:4000", "http://localhost:3000",
+    "http://127.0.0.1:4000", "http://127.0.0.1:3000",
+    "http://localhost:9000", "http://127.0.0.1:9000",
+]
+
 _cors_origins_env = os.getenv("BACKEND_CORS_ORIGINS", "")
-_cors_origins = (
-    [o.strip() for o in _cors_origins_env.split(",") if o.strip()]
-    if _cors_origins_env
-    else ["http://localhost:4000", "http://localhost:3000", "http://127.0.0.1:4000", "http://127.0.0.1:3000", "http://localhost:9000", "https://my-teacher-ai.vercel.app"]
-)
+# Handle wildcard ("*" or '["*"]') — use ["*"] list which FastAPI CORS treats as allow-all
+if _cors_origins_env.strip() in ("*", '["*"]', "['*']"):
+    _cors_origins = ["*"]
+elif _cors_origins_env:
+    env_origins = [o.strip() for o in _cors_origins_env.split(",") if o.strip()]
+    # Always include localhost for local development, even when env var is set
+    _cors_origins = list(dict.fromkeys(env_origins + _LOCALHOST_ORIGINS))
+else:
+    _cors_origins = _LOCALHOST_ORIGINS + ["https://my-teacher-ai.vercel.app"]
 
 app.add_middleware(
     CORSMiddleware,

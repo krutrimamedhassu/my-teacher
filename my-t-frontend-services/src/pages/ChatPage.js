@@ -437,17 +437,22 @@ const ChatPage = () => {
                     username = 'anonymous';
                 }
                 
-                // If we reach here, create a new conversation
-                console.log('🚀 ChatPage: Creating new conversation with userId =', userId, 'username =', username);
-                const response = await createConversation({ user_id: userId, username });
-                console.log('🚀 ChatPage: Conversation created successfully:', response);
-                setConversations([{
-                    id: response.conversation_id,
-                    title: response.conversation.title,
-                    timestamp: response.conversation.created_at
-                }]);
-                console.log('🚀 ChatPage: Navigating to new conversation:', response.conversation_id);
-                navigate(`/chat/${response.conversation_id}`, { replace: true });
+                // Generate ID locally and navigate immediately — don't wait on backend
+                const newConversationId = uuidv4();
+                console.log('🚀 ChatPage: Navigating immediately to new conversation:', newConversationId);
+                navigate(`/chat/${newConversationId}`, { replace: true });
+                // Register with backend in background
+                try {
+                    const response = await createConversation({ conversation_id: newConversationId, user_id: userId, username });
+                    console.log('🚀 ChatPage: Conversation registered with backend:', response);
+                    setConversations([{
+                        id: newConversationId,
+                        title: response?.conversation?.title || 'New Chat',
+                        timestamp: response?.conversation?.created_at
+                    }]);
+                } catch (error) {
+                    console.error('🚀 ChatPage: Failed to register conversation with backend:', error);
+                }
             }
             // This logic is now handled above in the URL-first approach
         })();
@@ -1240,10 +1245,21 @@ const ChatPage = () => {
         setInputValue('');
 
         try {
+            // If no conversation exists yet (e.g. createConversation failed on load), create one now
+            let activeConversationId = conversationId;
+            if (!activeConversationId) {
+                const anonUserId = localStorage.getItem('anon_user_id') || user_id;
+                const newConv = await createConversation({ user_id: anonUserId, username });
+                activeConversationId = newConv.conversation_id;
+                setConversationId(activeConversationId);
+                setCurrentConversation(activeConversationId);
+                navigate(`/chat/${activeConversationId}`, { replace: true });
+            }
+
             // Persist user message to backend
-            await sendMessageToConversation(conversationId, userMessage);
+            await sendMessageToConversation(activeConversationId, userMessage);
             // Fetch updated messages from backend to sync with server
-            const conv = await getConversationById(conversationId);
+            const conv = await getConversationById(activeConversationId);
             if (conv && Array.isArray(conv.messages)) {
                 const processedMessages = conv.messages.map(processMessage);
                 setMessages(processedMessages);
@@ -1265,7 +1281,7 @@ const ChatPage = () => {
             }
 
             console.log('💬 ChatPage: Calling responder API');
-            const response = await callResponderAPI(userMessage.text, conversationId, selectedApiKey);
+            const response = await callResponderAPI(userMessage.text, activeConversationId, selectedApiKey);
 
             if (settings.streamingMode === 'streaming' && bufferingIntervalRef.current) {
                 clearInterval(bufferingIntervalRef.current);
@@ -1305,10 +1321,10 @@ const ChatPage = () => {
                     text: response.response,
                     attachments: []
                 };
-                await sendMessageToConversation(conversationId, aiMessage);
-                
+                await sendMessageToConversation(activeConversationId, aiMessage);
+
                 // Fetch updated messages from backend
-                const convAfterAI = await getConversationById(conversationId);
+                const convAfterAI = await getConversationById(activeConversationId);
                 if (convAfterAI && Array.isArray(convAfterAI.messages)) {
                     const processedMessages = convAfterAI.messages.map(msg => {
                                         return {
@@ -1415,6 +1431,11 @@ const ChatPage = () => {
 
     const createNewConversation = async () => {
         console.log('🆕 ChatPage: createNewConversation called');
+        // Generate ID and navigate immediately
+        const newConversationId = uuidv4();
+        navigate(`/chat/${newConversationId}`);
+        setConversationId(newConversationId);
+        setCurrentConversation(newConversationId);
         try {
             let user = null;
             if (authContextIsAuthenticated) {
@@ -1423,13 +1444,12 @@ const ChatPage = () => {
             } else {
                 console.log('🆕 ChatPage: No authenticated user');
             }
-            console.log('🆕 ChatPage: Creating conversation with user_id =', user?.id, 'username =', user?.username);
+            console.log('🆕 ChatPage: Registering conversation with user_id =', user?.id, 'username =', user?.username);
             const response = await createConversation({
+                conversation_id: newConversationId,
                 user_id: user?.id,
                 username: user?.username
             });
-            setConversationId(response.conversation_id);
-            setCurrentConversation(response.conversation_id);
             // Refresh conversations list
             if (authContextIsAuthenticated) {
                 const conversationsArr = await listConversations({ user_id: user?.id });
@@ -1628,25 +1648,12 @@ const ChatPage = () => {
                     height: '100vh',
                     position: 'relative',
                     bgcolor: 'white',
-                    width: (() => {
-                        if (isMobile) return '100%';
-                        
-                        // Calculate total width taken by sidebars
-                        const leftSidebarWidth = sidebarOpen ? 260 : 48;
-                        const rightSidebarWidthCalc = rightSidebarOpen ? (rightSidebarWidth || 840) : 48;
-                        const totalSidebarWidth = leftSidebarWidth + rightSidebarWidthCalc;
-                        
-                        // Ensure we don't exceed viewport width
-                        const availableWidth = window.innerWidth - totalSidebarWidth;
-                        const minChatWidth = 300; // Minimum chat width
-                        
-                        return `${Math.max(availableWidth, minChatWidth)}px`;
-                    })(),
+                    flex: 1,
                     minWidth: '300px',
-                    transition: 'width 0.3s ease'
+                    overflow: 'hidden'
                 }}
             >
-                <div className="chat-rail" style={{ scrollbarGutter: 'stable' }}>
+                <div className="chat-rail">
                     {/* Mobile Menu Button */}
                     {isMobile && (
                         <Box
@@ -1736,8 +1743,8 @@ const ChatPage = () => {
                         <Box
                             sx={{
                                 width: '100%',
-                                maxWidth: 'min(778px, 100%)',
-                                margin: 0,
+                                maxWidth: 'min(778px, calc(100% - 32px))',
+                                margin: '0 auto',
                                 px: '10px'
                             }}
                         >
