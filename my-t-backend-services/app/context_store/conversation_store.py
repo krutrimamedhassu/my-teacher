@@ -36,6 +36,7 @@ class ConversationManager:
                 'updated_at': now,
                 'is_active': True,
                 'deleted': False,
+                'is_example': False,
                 'last_message_preview': '',
                 'messages': []
             }
@@ -62,6 +63,7 @@ class ConversationManager:
                 'updated_at': now,
                 'is_active': True,
                 'deleted': False,
+                'is_example': False,
                 'last_message_preview': '',
                 'messages': []
             }
@@ -146,6 +148,8 @@ class ConversationManager:
             doc = col.find_one({'conversation_id': conversation_id, 'deleted': False}, {'_id': 0})
             if not doc:
                 raise FileNotFoundError('Conversation not found')
+            if doc.get('is_example'):
+                raise PermissionError('Example conversations cannot be edited')
             set_fields: Dict[str, Any] = {'updated_at': _now()}
             if title is not None:
                 set_fields['title'] = title
@@ -166,6 +170,8 @@ class ConversationManager:
             doc = col.find_one({'conversation_id': conversation_id}, {'_id': 0})
             if not doc:
                 raise FileNotFoundError('Conversation not found')
+            if doc.get('is_example'):
+                raise PermissionError('Example conversations cannot be deleted')
             set_fields = {'deleted': True, 'is_active': False, 'updated_at': _now()}
             col.update_one({'conversation_id': conversation_id}, {'$set': set_fields})
             doc.update(set_fields)
@@ -297,6 +303,22 @@ class ConversationManager:
             return 0
 
     @staticmethod
+    def list_example_conversations() -> List[Dict[str, Any]]:
+        app_logger.log_info("[ConversationManager] list_example_conversations")
+        try:
+            cursor = _col().find(
+                {'is_example': True, 'deleted': False},
+                {'_id': 0, 'conversation_id': 1, 'title': 1, 'created_at': 1,
+                 'updated_at': 1, 'last_message_preview': 1, 'is_active': 1, 'is_example': 1}
+            ).sort('created_at', 1)
+            result = list(cursor)
+            app_logger.log_info(f"[ConversationManager] Found {len(result)} example conversations")
+            return result
+        except Exception as e:
+            app_logger.log_error(f"[ConversationManager] Error in list_example_conversations: {e}")
+            raise
+
+    @staticmethod
     def cleanup_expired_conversations() -> Dict[str, int]:
         """
         Hard-delete expired conversations:
@@ -311,12 +333,14 @@ class ConversationManager:
             anon_cutoff = now - timedelta(hours=24)
             anon_result = col.delete_many({
                 'user_id': None,
+                'is_example': {'$ne': True},
                 'created_at': {'$lt': anon_cutoff.isoformat()}
             })
 
             user_cutoff = now - timedelta(days=30)
             user_result = col.delete_many({
                 'user_id': {'$ne': None},
+                'is_example': {'$ne': True},
                 'updated_at': {'$lt': user_cutoff.isoformat()}
             })
 

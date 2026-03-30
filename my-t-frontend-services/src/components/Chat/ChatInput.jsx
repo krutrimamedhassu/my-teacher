@@ -1,8 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Box, TextField, IconButton } from '@mui/material';
+import { Box, TextField, IconButton, Typography } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom';
 import { startRecording, stopStream, sendAudioForTranscription } from '../../services/speech/speechService';
 
-const ChatInput = ({ inputValue, setInputValue, handleSendMessage, handleKeyPress, isTyping, inputRef, theme, isMobile, onFileUpload, hasMessages = false, onFilesAttachedChange }) => {
+const ChatInput = ({ inputValue, setInputValue, handleSendMessage, handleKeyPress, isTyping, inputRef, theme, isMobile, onFileUpload, hasMessages = false, onFilesAttachedChange, isReadOnly = false }) => {
     console.log('💬 ChatInput: Component rendered with props:', {
         inputValue: inputValue?.substring(0, 50) + (inputValue?.length > 50 ? '...' : ''),
         isTyping,
@@ -390,6 +391,31 @@ const ChatInput = ({ inputValue, setInputValue, handleSendMessage, handleKeyPres
                 multiple
             />
 
+            {/* Read-only banner for example conversations */}
+            {isReadOnly && (
+                <Box sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: 0.5,
+                    py: 0.75,
+                    px: 2,
+                    bgcolor: theme.palette.grey[50],
+                    borderBottom: `1px solid ${theme.palette.grey[200]}`
+                }}>
+                    <Typography variant="caption" color="text.secondary" sx={{ fontSize: '13px' }}>
+                        This is a read-only example.{' '}
+                        <RouterLink
+                            to="/register"
+                            style={{ color: theme.palette.text.primary, fontWeight: 600, textDecoration: 'underline' }}
+                        >
+                            Sign up free
+                        </RouterLink>
+                        {' '}to start your own conversation.
+                    </Typography>
+                </Box>
+            )}
+
             {/* DEBUG: Visual indicator for selectedFiles state */}
             <Box sx={{ 
                 position: 'absolute', 
@@ -561,10 +587,10 @@ const ChatInput = ({ inputValue, setInputValue, handleSendMessage, handleKeyPres
                                 handleKeyPress(e);
                             }
                         }}
-                        placeholder="Ask me anything..."
+                        placeholder={isReadOnly ? "Sign up to start chatting..." : "Ask me anything..."}
                         variant="outlined"
                         fullWidth
-                        disabled={isTyping}
+                        disabled={isTyping || isReadOnly}
                         sx={{
                             '& .MuiOutlinedInput-root': {
                                 borderRadius: 2,
@@ -646,7 +672,7 @@ const ChatInput = ({ inputValue, setInputValue, handleSendMessage, handleKeyPres
                 {/* Add button */}
                 <IconButton
                     onClick={handleAddButtonClick}
-                    disabled={isTyping}
+                    disabled={isTyping || isReadOnly}
                     sx={{
                         width: 40,
                         height: 40,
@@ -672,7 +698,7 @@ const ChatInput = ({ inputValue, setInputValue, handleSendMessage, handleKeyPres
                 {/* Voice button */}
                 <IconButton
                     onClick={handleMicrophoneClick}
-                    disabled={isTyping || isTranscribing}
+                    disabled={isTyping || isTranscribing || isReadOnly}
                     sx={{
                         width: 40,
                         height: 40,
@@ -716,7 +742,7 @@ const ChatInput = ({ inputValue, setInputValue, handleSendMessage, handleKeyPres
                         console.log('💬 ChatInput: Send button clicked');
                         handleSendMessageWithFile();
                     }}
-                    disabled={(!inputValue.trim() && selectedFiles.filter(f => f.file && !f.isPersisted).length === 0) || isTyping}
+                    disabled={(!inputValue.trim() && selectedFiles.filter(f => f.file && !f.isPersisted).length === 0) || isTyping || isReadOnly}
                     sx={{
                         width: 36,
                         height: 36,

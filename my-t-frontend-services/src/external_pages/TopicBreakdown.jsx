@@ -24,20 +24,21 @@ const TopicBreakdown = ({ breakdownData, theme }) => {
   };
 
   const renderTopic = (topic, level = 0) => {
+    const topicId = String(topic?.id ?? '');
     const hasChildren = breakdownData.topics.some(t => 
-      t.id.startsWith(topic.id + '.') && t.id.split('.').length === level + 2
+      String(t?.id ?? '').startsWith(topicId + '.') && String(t?.id ?? '').split('.').length === level + 2
     );
     
     const childTopics = breakdownData.topics.filter(t => 
-      t.id.startsWith(topic.id + '.') && t.id.split('.').length === level + 2
+      String(t?.id ?? '').startsWith(topicId + '.') && String(t?.id ?? '').split('.').length === level + 2
     );
 
     if (hasChildren) {
       return (
         <Accordion
-          key={topic.id}
-          expanded={expanded.has(topic.id)}
-          onChange={handleAccordionChange(topic.id)}
+          key={topicId}
+          expanded={expanded.has(topicId)}
+          onChange={handleAccordionChange(topicId)}
           sx={{
             mb: 1.5,
             '&:before': { display: 'none' },
@@ -62,7 +63,7 @@ const TopicBreakdown = ({ breakdownData, theme }) => {
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, width: '100%' }}>
               <Chip 
-                label={topic.id} 
+                label={topicId} 
                 size="small" 
                 variant="outlined"
                 sx={{ 
@@ -97,7 +98,7 @@ const TopicBreakdown = ({ breakdownData, theme }) => {
     } else {
       return (
         <Paper
-          key={topic.id}
+          key={topicId}
           elevation={0}
           sx={{
             p: 2.5,
@@ -109,7 +110,7 @@ const TopicBreakdown = ({ breakdownData, theme }) => {
         >
           <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2, mb: 1.5 }}>
             <Chip 
-              label={topic.id} 
+              label={topicId} 
               size="small" 
               variant="outlined"
               sx={{ 
@@ -140,7 +141,7 @@ const TopicBreakdown = ({ breakdownData, theme }) => {
   };
 
   const mainTopics = breakdownData.topics.filter(topic => 
-    topic.id.split('.').length === 1
+    String(topic?.id ?? '').split('.').length === 1
   );
 
   return (
