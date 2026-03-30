@@ -2,6 +2,7 @@ import os
 from enum import Enum
 from typing import Any, List, Optional
 from app.logger.app_logger import app_logger
+from pydantic import model_validator
 from pydantic_settings import BaseSettings
 
 
@@ -53,7 +54,8 @@ class Settings(BaseSettings):
     LOG_LEVEL: str
 
     # Logfire settings
-    LOGFIRE_TOKEN: Optional[str] = None
+    LOGFIRE_TOKEN: Optional[str]
+    LOGFIRE_ENVIRONMENT: Optional[str]
 
     # Server settings
     PORT: Optional[int]
@@ -68,6 +70,12 @@ class Settings(BaseSettings):
     # TTS settings
     TTS_MODEL: str = "tts-1"
     TTS_VOICE: str = "alloy"
+
+    @model_validator(mode="after")
+    def _apply_streaming_defaults(self) -> "Settings":
+        if not self.STREAMING_MODEL:
+            self.STREAMING_MODEL = self.DEFAULT_MODEL
+        return self
 
     @property
     def ENVIRONMENT(self) -> AppEnvironment:

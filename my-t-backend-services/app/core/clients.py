@@ -30,7 +30,10 @@ class LogfireClient:
         try:
             import logfire
             self.logfire = logfire
-            logfire.configure(token=settings.LOGFIRE_TOKEN)
+            logfire.configure(
+                token=settings.LOGFIRE_TOKEN,
+                environment=settings.LOGFIRE_ENVIRONMENT,
+            )
             self.is_configured = True
             app_logger.log_info("[Clients] Logfire configured successfully")
             return True
