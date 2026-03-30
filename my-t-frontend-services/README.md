@@ -1,6 +1,6 @@
-# MyTeacher — Frontend
+# My Teacher — Frontend
 
-React-based frontend for the MyTeacher AI study companion. Provides a chat interface, learning tools, authentication, and user profile management.
+React-based frontend for the My Teacher AI study companion. Provides a chat interface, learning tools, authentication, and user profile management.
 
 ---
 
@@ -49,8 +49,8 @@ Copy `.env.example` to `.env` and fill in:
 
 ```env
 REACT_APP_BASE_BACKEND_URL=http://localhost:9150
-REACT_APP_TITLE=MyTeacher
-REACT_APP_PAGE_TITLE=MyTeacher - AI Study Companion
+REACT_APP_TITLE=My Teacher
+REACT_APP_PAGE_TITLE=My Teacher - AI Study Companion
 REACT_APP_DESCRIPTION=Your personal AI-powered study companion
 
 HOST=0.0.0.0

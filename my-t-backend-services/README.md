@@ -1,6 +1,6 @@
-# MyTeacher — Backend
+# My Teacher — Backend
 
-FastAPI backend for the MyTeacher AI study companion. Handles authentication, LLM interactions, document processing, speech, web scraping, and usage tracking.
+FastAPI backend for the My Teacher AI study companion. Handles authentication, LLM interactions, document processing, speech, web scraping, and usage tracking.
 
 ---
 
