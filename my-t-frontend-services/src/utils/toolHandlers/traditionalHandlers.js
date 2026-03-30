@@ -102,7 +102,7 @@ export const handleFlashcardsTraditional = async (response, conversationId, para
         }
         
         // Send confirmation message
-        const confirmationText = `✨ Generated ${flashcardsData.flashcards.length} flashcards on ${flashcardsData.subject_area} (${flashcardsData.difficulty_level} level). Check them out in the sidebar!`;
+        const confirmationText = `✨ Generated ${flashcardsData.flashcards.length} Flashcards on ${flashcardsData.subject_area} (${flashcardsData.difficulty_level} level). Look in the Right Sidebar to view them.`;
         const aiMessage = {
             sender_id: null,
             sender_username: 'assistant',

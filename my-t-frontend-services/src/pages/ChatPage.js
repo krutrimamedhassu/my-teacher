@@ -20,12 +20,14 @@ import ChatInput from '../components/Chat/ChatInput';
     callResponderAPI, 
     uploadDocument, 
     
-    createConversation, 
-    listConversations, 
-    getConversationById, 
-    sendMessageToConversation, 
-    editConversation, 
-        deleteConversation, 
+    createConversation,
+    listConversations,
+    listExampleConversations,
+    getUserTier,
+    getConversationById,
+    sendMessageToConversation,
+    editConversation,
+        deleteConversation,
     getConversationSidebarInfo,
         deleteEmptyConversations,
         uploadMultipleDocuments,
@@ -68,8 +70,12 @@ const ChatPage = () => {
     const [inputValue, setInputValue] = useState('');
     const [isTyping, setIsTyping] = useState(false);
     const [conversations, setConversations] = useState([]);
+    const [exampleConversations, setExampleConversations] = useState([]);
     const [currentConversation, setCurrentConversation] = useState(null);
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [userTier, setUserTier] = useState(null);
+    const [isUserTierLoaded, setIsUserTierLoaded] = useState(false);
+    const sidebarOpenTouchedRef = useRef(false);
     const messagesEndRef = useRef(null);
     const inputRef = useRef(null);
     const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
@@ -81,6 +87,8 @@ const ChatPage = () => {
     const [isResizing, setIsResizing] = useState(false);
     const { conversationId: urlConversationId } = useParams();
     const navigate = useNavigate();
+    const isExampleConversation = exampleConversations.some(e => e.id === urlConversationId)
+        || (urlConversationId && urlConversationId.startsWith('00000000-0000-0000-'));
     const [sidebarInfoIndex, setSidebarInfoIndex] = useState(0);
     const [sidebarInfoList, setSidebarInfoList] = useState([]);
     const [streamingContent, setStreamingContent] = useState('');
@@ -102,6 +110,61 @@ const ChatPage = () => {
 
     console.log('📱 ChatPage: isMobile =', isMobile);
     console.log('⚙️ ChatPage: Current settings:', settings);
+
+    // Load example conversations once on mount (no auth required)
+    useEffect(() => {
+        listExampleConversations()
+            .then(data => {
+                if (Array.isArray(data)) {
+                    setExampleConversations(data.map(c => ({
+                        id: c.conversation_id,
+                        title: c.title,
+                        is_example: true
+                    })));
+                }
+            })
+            .catch(() => {});
+    }, []);
+
+    // Fetch authenticated user's tier (free/premium). Anonymous users: keep null.
+    useEffect(() => {
+        if (authLoading) return;
+        if (!authContextIsAuthenticated) {
+            setUserTier(null);
+            setIsUserTierLoaded(true);
+            return;
+        }
+
+        (async () => {
+            try {
+                const tierInfo = await getUserTier();
+                setUserTier(tierInfo?.tier || null);
+            } catch (e) {
+                // Non-fatal: if tier fetch fails, default to non-premium behavior
+                setUserTier(null);
+            } finally {
+                setIsUserTierLoaded(true);
+            }
+        })();
+    }, [authLoading, authContextIsAuthenticated]);
+
+    // Default left sidebar open for everyone except premium.
+    useEffect(() => {
+        if (authLoading) return;
+        if (sidebarOpenTouchedRef.current) return;
+
+        // Anonymous users: open immediately so they can see EXAMPLES.
+        if (!authContextIsAuthenticated) {
+            setSidebarOpen(true);
+            return;
+        }
+
+        // Authenticated users: avoid flicker by waiting for tier to load.
+        if (!isUserTierLoaded) return;
+
+        const isPremium = userTier === 'premium';
+        setSidebarOpen(!isPremium);
+    }, [authLoading, authContextIsAuthenticated, isUserTierLoaded, userTier]);
 
     // Rotate welcome messages every 5 seconds when no messages
     useEffect(() => {
@@ -425,18 +488,13 @@ const ChatPage = () => {
                         console.log('🚀 ChatPage: Error fetching conversations, will create new:', error);
                     }
                 } else {
-                    // For anonymous users, generate or reuse a user_id
-                    userId = localStorage.getItem('anon_user_id');
-                    if (!userId) {
-                        userId = uuidv4();
-                        localStorage.setItem('anon_user_id', userId);
-                        console.log('🚀 ChatPage: Generated new anonymous userId =', userId);
-                    } else {
-                        console.log('🚀 ChatPage: Reusing existing anonymous userId =', userId);
-                    }
-                    username = 'anonymous';
+                    // For anonymous users: redirect to the welcome example conversation
+                    const welcomeExampleId = '00000000-0000-0000-0000-000000000001';
+                    console.log('🚀 ChatPage: Anonymous user, navigating to welcome example:', welcomeExampleId);
+                    navigate(`/chat/${welcomeExampleId}`, { replace: true });
+                    return;
                 }
-                
+
                 // Generate ID locally and navigate immediately — don't wait on backend
                 const newConversationId = uuidv4();
                 console.log('🚀 ChatPage: Navigating immediately to new conversation:', newConversationId);
@@ -1188,6 +1246,11 @@ const ChatPage = () => {
         console.log('💬 ChatPage: handleSendMessage called');
         console.log('💬 ChatPage: inputValue =', inputValue);
 
+        if (isExampleConversation) {
+            console.log('💬 ChatPage: Read-only example conversation, blocking message send');
+            return;
+        }
+
         if (!inputValue.trim()) {
             console.log('💬 ChatPage: Empty input, returning early');
             return;
@@ -1556,6 +1619,7 @@ const ChatPage = () => {
 
     const handleEditConversation = async (conversationId, newTitle) => {
         console.log('✏️ ChatPage: handleEditConversation called with conversationId =', conversationId, 'newTitle =', newTitle);
+        if (exampleConversations.some(e => e.id === conversationId)) return;
         try {
             console.log('✏️ ChatPage: Calling editConversation API...');
             const updated = await editConversation(conversationId, { title: newTitle });
@@ -1573,6 +1637,7 @@ const ChatPage = () => {
     const handleDeleteConversation = async (conversationId) => {
         console.log('🗑️ ChatPage: handleDeleteConversation called with conversationId =', conversationId);
         console.log('🗑️ ChatPage: currentConversation =', currentConversation);
+        if (exampleConversations.some(e => e.id === conversationId)) return;
         try {
             console.log('🗑️ ChatPage: Calling deleteConversation API...');
             await deleteConversation(conversationId);
@@ -1627,13 +1692,20 @@ const ChatPage = () => {
             {/* Left Sidebar - always rendered, shrinks when closed */}
             <LeftSidebar
                 conversations={conversations}
+                exampleConversations={exampleConversations}
                 currentConversation={currentConversation}
                 setCurrentConversation={setCurrentConversation}
                 createNewConversation={createNewConversation}
                 theme={theme}
                 open={sidebarOpen}
-                onClose={() => setSidebarOpen(false)}
-                onOpen={() => setSidebarOpen(true)}
+                onClose={() => {
+                    sidebarOpenTouchedRef.current = true;
+                    setSidebarOpen(false);
+                }}
+                onOpen={() => {
+                    sidebarOpenTouchedRef.current = true;
+                    setSidebarOpen(true);
+                }}
                 onSelectConversation={id => navigate(`/chat/${id}`)}
                 onEditConversation={handleEditConversation}
                 onDeleteConversation={handleDeleteConversation}
@@ -1667,6 +1739,7 @@ const ChatPage = () => {
                             <IconButton
                                 onClick={() => {
                                     console.log('📱 ChatPage: Mobile menu button clicked, current sidebarOpen =', sidebarOpen);
+                                    sidebarOpenTouchedRef.current = true;
                                     setSidebarOpen(!sidebarOpen);
                                 }}
                                 sx={{
@@ -1772,6 +1845,7 @@ const ChatPage = () => {
                     onFileUpload={handleFileUpload}
                     hasMessages={messages.length > 0}
                     onFilesAttachedChange={() => {}}
+                    isReadOnly={isExampleConversation}
                 />
             </Box>
 

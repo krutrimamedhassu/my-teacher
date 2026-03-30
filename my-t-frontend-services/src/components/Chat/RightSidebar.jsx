@@ -276,9 +276,9 @@ const RightSidebar = ({
               <Box className="flashcards-grid-sidebar">
                 {flashcards.flashcards.map((flashcard) => (
                   <Flashcard
-                    key={`flashcard-${flashcard.question.slice(0, 20)}-${flashcard.answer.slice(0, 10)}`}
-                    question={flashcard.question}
-                    answer={flashcard.answer}
+                    key={`flashcard-${String(flashcard?.question ?? '').slice(0, 20)}-${String(flashcard?.answer ?? '').slice(0, 10)}`}
+                    question={flashcard?.question}
+                    answer={flashcard?.answer}
                     subject={flashcards.subject_area || 'General'}
                     difficulty={flashcards.difficulty_level || 'Medium'}
                   />

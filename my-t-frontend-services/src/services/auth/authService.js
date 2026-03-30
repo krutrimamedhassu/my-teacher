@@ -106,11 +106,13 @@ export const updateEmail = async (currentPassword, newEmail) => {
 
 // User tier helpers (used in Settings)
 export const getUserTier = async () => {
-  return apiRequest('/users/tier', 'GET');
+  // Backend exposes this under /auth/tier
+  return apiRequest('/auth/tier', 'GET');
 };
 
 export const updateUserTier = async (tier) => {
-  return apiRequest('/users/tier', 'PUT', { tier });
+  // Backend exposes this under /auth/tier
+  return apiRequest('/auth/tier', 'PUT', { tier });
 };
 
 // Update basic profile fields

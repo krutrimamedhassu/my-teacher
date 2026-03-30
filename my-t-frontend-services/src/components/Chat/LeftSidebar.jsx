@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Box, List, ListItem, ListItemText, ListItemButton, IconButton, Typography, Tooltip, Menu, MenuItem, Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Avatar, Divider } from '@mui/material';
-import { MoreVert as MoreVertIcon, Check as CheckIcon, Close as CloseIcon, Person as PersonIcon } from '@mui/icons-material';
+import { MoreVert as MoreVertIcon, Check as CheckIcon, Close as CloseIcon, Person as PersonIcon, LockOutlined as LockOutlinedIcon } from '@mui/icons-material';
 import { Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { getConversationById } from '../../services';
 
 const LeftSidebar = ({
   conversations,
+  exampleConversations = [],
   currentConversation,
   setCurrentConversation,
   createNewConversation,
@@ -497,10 +498,48 @@ const LeftSidebar = ({
       {/* Spacing below top actions */}
       <Box sx={{ height: 16 }} />
 
+      {/* Examples section */}
+      {exampleConversations.length > 0 && (
+        <>
+          <Typography
+            variant="caption"
+            sx={{ color: theme.palette.text.secondary, px: 2, pt: 0, pb: 0.5, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase' }}
+          >
+            Examples
+          </Typography>
+          <List sx={{ py: 0 }}>
+            {exampleConversations.map((conv) => (
+              <ListItem
+                key={conv.id}
+                onClick={() => onSelectConversation ? onSelectConversation(conv.id) : setCurrentConversation(conv.id)}
+                sx={{
+                  borderRadius: 2,
+                  mx: 1,
+                  mb: 0.5,
+                  cursor: 'pointer',
+                  bgcolor: currentConversation === conv.id ? theme.palette.action.selected : 'transparent',
+                  '&:hover': { bgcolor: theme.palette.action.hover },
+                  minHeight: 44
+                }}
+              >
+                <ListItemText
+                  primary={conv.title}
+                  primaryTypographyProps={{ noWrap: true, variant: 'body2', fontWeight: 500 }}
+                />
+                <Tooltip title="Read-only example">
+                  <LockOutlinedIcon sx={{ fontSize: 14, color: theme.palette.text.disabled, ml: 1, flexShrink: 0 }} />
+                </Tooltip>
+              </ListItem>
+            ))}
+          </List>
+          <Divider sx={{ mx: 2, mt: 0.5, mb: 1 }} />
+        </>
+      )}
+
       {/* Chats section header */}
       <Typography
         variant="caption"
-        sx={{ color: theme.palette.text.secondary, px: 2, pt: 2, pb: 1, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase' }}
+        sx={{ color: theme.palette.text.secondary, px: 2, pt: 0, pb: 1, fontWeight: 600, letterSpacing: 1, textTransform: 'uppercase' }}
       >
         Chats
       </Typography>

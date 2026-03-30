@@ -116,6 +116,16 @@ def cleanup_conversations():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@router.get("/examples", summary="List all example/demo conversations")
+def list_example_conversations():
+    app_logger.log_info("[ConversationsAPI] list_example_conversations")
+    try:
+        return ConversationManager.list_example_conversations()
+    except Exception as e:
+        app_logger.log_error(f"[ConversationsAPI] Error in list_example_conversations: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/{conversation_id}", summary="Get a conversation by ID")
 def get_conversation(conversation_id: str):
     app_logger.log_info(f"[ConversationsAPI] get_conversation {conversation_id}")
@@ -137,6 +147,8 @@ def edit_conversation(
     app_logger.log_info(f"[ConversationsAPI] edit_conversation {conversation_id}")
     try:
         return ConversationManager.edit_conversation(conversation_id, title=title, is_active=is_active)
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Conversation not found")
     except Exception as e:
@@ -150,6 +162,8 @@ def delete_conversation(conversation_id: str = Path(...)):
     try:
         conv = ConversationManager.delete_conversation(conversation_id)
         return {"detail": "Conversation deleted", "conversation": conv}
+    except PermissionError as e:
+        raise HTTPException(status_code=403, detail=str(e))
     except FileNotFoundError:
         raise HTTPException(status_code=404, detail="Conversation not found")
     except Exception as e:

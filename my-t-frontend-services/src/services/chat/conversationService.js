@@ -62,6 +62,11 @@ export const getConversationDocuments = async (conversation_id) => {
   return apiRequest(`/conversations/${encodeURIComponent(conversation_id)}/documents`, 'GET');
 };
 
+// Get all example/demo conversations (no auth required)
+export const listExampleConversations = async () => {
+  return apiRequest('/conversations/examples', 'GET');
+};
+
 // Delete a document from a conversation
 export const deleteConversationDocument = async (conversation_id, document_id, delete_references = true) => {
   if (!conversation_id) throw new Error('conversation_id is required');
