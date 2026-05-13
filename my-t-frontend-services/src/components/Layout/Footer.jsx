@@ -2,15 +2,16 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Box, Typography, Button } from '@mui/material';
 import { useAuth } from '../../contexts/AuthContext';
+import { fonts, colors } from '../Landing/tokens';
 
 const Footer = () => {
   const { isAuthenticated } = useAuth();
 
   const featureLinks = [
     { label: 'AI Chat', path: '/chat' },
-    { label: 'Text to Speech', path: '/speech' },
-    { label: 'Topic Breakdown', path: '/breakdown' },
-    { label: 'Key Concepts', path: '/key-concepts' },
+    { label: 'Text to Speech', path: '/chat' },
+    { label: 'Topic Breakdown', path: '/chat' },
+    { label: 'Key Concepts', path: '/chat' },
   ];
 
   const resourceLinks = [
@@ -33,10 +34,12 @@ const Footer = () => {
     <Box
       component="footer"
       sx={{
-        backgroundColor: 'white',
-        py: 4,
+        backgroundColor: colors.paper,
+        borderTop: `1px solid rgba(20, 30, 60, 0.08)`,
+        py: 6,
         px: 4,
-        mt: 6,
+        mt: 0,
+        fontFamily: fonts.sans,
       }}
     >
       <Box
@@ -53,13 +56,15 @@ const Footer = () => {
           <Typography
             variant="h6"
             sx={{
-              fontWeight: 600,
-              color: '#000',
-              fontSize: '18px',
+              fontFamily: fonts.display,
+              fontWeight: 400,
+              color: '#0a1024',
+              fontSize: '20px',
+              letterSpacing: '-0.01em',
               mb: 2,
             }}
           >
-            {process.env.REACT_APP_FOOTER_TITLE}
+            My Teacher
           </Typography>
           <Typography
             sx={{
@@ -70,7 +75,7 @@ const Footer = () => {
               maxWidth: '280px',
             }}
           >
-            {process.env.REACT_APP_FOOTER_DESCRIPTION}
+            An AI tutor for any subject. Chat, study, and practice in one place.
           </Typography>
           <Box sx={{ display: 'flex', gap: 2 }}>
             <Button
@@ -246,7 +251,7 @@ const Footer = () => {
             color: '#666',
           }}
         >
-          © 2025 {process.env.REACT_APP_FOOTER_TITLE}. All rights reserved.
+          © {new Date().getFullYear()} My Teacher. All rights reserved.
         </Typography>
         <Typography
           sx={{
@@ -254,7 +259,7 @@ const Footer = () => {
             color: '#666',
           }}
         >
-          Made with ❤️ for learners everywhere
+          Built for learners everywhere
         </Typography>
       </Box>
     </Box>

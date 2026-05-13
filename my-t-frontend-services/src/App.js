@@ -124,10 +124,6 @@ theme = responsiveFontSizes(theme);
 
 // Global styles
 const globalStyles = {
-  // Smooth scrolling for the entire page
-  html: {
-    scrollBehavior: 'smooth',
-  },
   // Subtle animations for links and interactive elements (but not form inputs)
   'a, button, .MuiButtonBase-root': {
     transition: 'all 0.2s ease-in-out !important',
@@ -165,20 +161,20 @@ const globalStyles = {
     scrollMarginTop: '0px !important',
     scrollMarginBottom: '0px !important',
   },
-  // Custom scrollbar for modern browsers
-  '::-webkit-scrollbar': {
-    width: '8px',
-    height: '8px',
+  // Hide the page-level scrollbar; inner overflow containers keep their own bars.
+  html: {
+    scrollBehavior: 'smooth',
+    scrollbarWidth: 'none',
+    msOverflowStyle: 'none',
   },
-  '::-webkit-scrollbar-track': {
-    background: '#f1f1f1',
+  body: {
+    scrollbarWidth: 'none',
+    msOverflowStyle: 'none',
   },
-  '::-webkit-scrollbar-thumb': {
-    background: '#c1c1c1',
-    borderRadius: '4px',
-  },
-  '::-webkit-scrollbar-thumb:hover': {
-    background: '#a8a8a8',
+  'html::-webkit-scrollbar, body::-webkit-scrollbar': {
+    display: 'none',
+    width: 0,
+    height: 0,
   },
   // Improve text selection
   '::selection': {
@@ -189,7 +185,7 @@ const globalStyles = {
 
 function App() {
   useEffect(() => {
-    document.title = process.env.REACT_APP_PAGE_TITLE;
+    document.title = 'My Teacher';
   }, []);
 
   return (

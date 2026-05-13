@@ -1,0 +1,110 @@
+/* Landing page responsive overrides not expressible via inline styles. */
+
+.spotlight-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(36px, 5vw, 80px);
+  align-items: center;
+  padding: clamp(40px, 5.5vw, 80px) 0;
+}
+
+@media (max-width: 880px) {
+  .spotlight-grid {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    padding: 40px 0;
+  }
+  /* On mobile, the preview always sits below the copy so reading order is right. */
+  .spotlight-grid.reverse > *:first-child { order: 2; }
+  .spotlight-grid.reverse > *:last-child { order: 1; }
+  .spotlight-grid > div:has(.mini-frame) {
+    justify-content: flex-start !important;
+  }
+}
+
+/* "Rest of the toolkit" — inset panel below the spotlights */
+.gridlite-divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 24px 0 28px;
+  color: #5a6071;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.gridlite-divider::before,
+.gridlite-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(20, 30, 60, 0.10);
+}
+
+.gridlite-shell {
+  margin-top: 8px;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 24px;
+  border: 1px solid rgba(20, 30, 60, 0.06);
+  box-shadow: 0 18px 40px -28px rgba(20, 30, 60, 0.12);
+}
+
+.gridlite {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+@media (max-width: 880px) {
+  .gridlite { grid-template-columns: 1fr; }
+  .gridlite-shell { padding: 18px; }
+}
+
+.gridlite-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 14px;
+  padding: 20px;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+              background 320ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.gridlite-tile:hover {
+  transform: translateY(-2px);
+  background: #fafaf7;
+  border-color: rgba(20, 30, 60, 0.10);
+}
+.gridlite-tile:hover .gridlite-icon {
+  background: #0a1024;
+  color: #ffffff;
+}
+.gridlite-tile h4 {
+  margin: 0;
+  font-family: sans-serif;
+  font-weight: 500;
+  font-size: 17px;
+  letter-spacing: -0.005em;
+  color: #0a1024;
+}
+.gridlite-tile p {
+  margin: 0;
+  color: #5a6071;
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+.gridlite-tile .gridlite-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(20, 30, 60, 0.06);
+  color: #1d2230;
+  transition: background 320ms cubic-bezier(0.22, 1, 0.36, 1),
+              color 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}

@@ -196,15 +196,15 @@ const AuthPage = () => {
         >
           <Box sx={{ position: 'absolute', top: 20, left: 24 }}>
             <Typography variant="h6" sx={{ fontWeight: 600, color: '#000', fontSize: '18px' }}>
-              {process.env.REACT_APP_HEADER_TITLE}
+              My Teacher
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'flex-start', flex: 1, width: '100%', pl: 0 }}>
             <Typography variant="h2" sx={{ color: '#1976d2', fontWeight: 700, fontSize: { xs: '32px', md: '42px' }, lineHeight: 1.1, mb: 1 }}>
-              {process.env.REACT_APP_HERO_LINE1}
+              Learn anything.
             </Typography>
             <Typography variant="h3" sx={{ color: '#1976d2', fontWeight: 500, fontSize: { xs: '24px', md: '32px' }, lineHeight: 1.1 }}>
-              {process.env.REACT_APP_HERO_LINE2}
+              Your AI tutor is ready.
             </Typography>
           </Box>
         </Box>

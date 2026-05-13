@@ -141,7 +141,7 @@ const LoginPage = () => {
               fontSize: '18px',
             }}
           >
-{process.env.REACT_APP_HEADER_TITLE}
+            My Teacher
           </Typography>
         </Box>
 
@@ -165,7 +165,7 @@ const LoginPage = () => {
               mb: 1,
             }}
           >
-            {process.env.REACT_APP_HERO_LINE1}
+            Learn anything.
           </Typography>
           <Typography
             variant="h3"
@@ -176,7 +176,7 @@ const LoginPage = () => {
               lineHeight: 1.1,
             }}
           >
-            {process.env.REACT_APP_HERO_LINE2}
+            Your AI tutor is ready.
           </Typography>
         </Box>
       </Box>
