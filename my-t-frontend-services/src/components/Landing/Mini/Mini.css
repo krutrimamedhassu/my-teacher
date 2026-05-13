@@ -1,0 +1,448 @@
+/* ------- shared miniature styles ------- */
+
+.mini-frame {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid rgba(20, 30, 60, 0.08);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.9) inset,
+    0 8px 24px -10px rgba(20, 30, 60, 0.14),
+    0 24px 48px -20px rgba(20, 30, 60, 0.10);
+  padding: 16px;
+  font-family: sans-serif;
+  color: #1d2230;
+  overflow: hidden;
+}
+
+.mini-frame .mini-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8a92a3;
+  font-weight: 600;
+}
+.mini-frame .mini-dots {
+  display: inline-flex;
+  gap: 4px;
+  margin-right: 6px;
+}
+.mini-frame .mini-dots i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: rgba(20, 30, 60, 0.16);
+  display: block;
+}
+
+/* ------- MiniChat ------- */
+
+.mini-chat-bubble {
+  border-radius: 14px;
+  padding: 10px 13px;
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 86%;
+  font-weight: 400;
+}
+.mini-chat-bubble.user {
+  background: #0a1024;
+  color: #e7eaf3;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+.mini-chat-bubble.tutor {
+  background: #f3f5fa;
+  color: #1d2230;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.mini-cursor {
+  display: inline-block;
+  width: 6px;
+  height: 1em;
+  vertical-align: -2px;
+  background: currentColor;
+  margin-left: 2px;
+  opacity: 0.7;
+  animation: miniBlink 1s steps(2, end) infinite;
+}
+@keyframes miniBlink {
+  0%, 50% { opacity: 0.8; }
+  50.01%, 100% { opacity: 0; }
+}
+
+/* ------- MiniFlashcard (matches real Flashcard.jsx ribbon + pill) ------- */
+
+.mini-fc {
+  position: relative;
+  perspective: 1200px;
+  width: 100%;
+  height: 240px;
+}
+.mini-fc-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mini-fc.flipped .mini-fc-inner { transform: rotateY(180deg); }
+.mini-fc-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: #ffffff;
+  border: 1px solid rgba(20, 30, 60, 0.08);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.mini-fc-face.back { transform: rotateY(180deg); }
+
+.mini-fc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 0 14px;
+}
+.mini-fc-ribbon {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 0 0 6px 6px;
+  background: #000000;
+  color: #ffffff;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.mini-fc-pill {
+  margin-top: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #000000;
+  background: #ffffff;
+  border: 1px solid #000000;
+}
+.mini-fc-body {
+  flex: 1;
+  padding: 8px 22px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 400;
+  color: #0a1024;
+}
+.mini-fc-face.back .mini-fc-body { color: #1d2230; }
+.mini-fc-face.back { background: #f8f9fa; }
+
+/* ------- MiniStudyPlan (single Day session card, echoes real StudyPlan.jsx) ------- */
+
+.mini-sp {
+  font-family: sans-serif;
+}
+.mini-sp-card {
+  background: #ffffff;
+  border: 2px solid #0a1024;
+  padding: 14px 16px 16px;
+  position: relative;
+}
+.mini-sp-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(20, 30, 60, 0.12);
+}
+.mini-sp-day {
+  font-family: "Times New Roman", Times, serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0a1024;
+  letter-spacing: -0.005em;
+}
+.mini-sp-day small {
+  font-weight: 400;
+  color: #5a6071;
+  margin-left: 6px;
+  font-size: 13px;
+}
+.mini-sp-duration {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 4px 8px;
+  border: 2px solid #0a1024;
+  background: #ffffff;
+  color: #0a1024;
+  text-transform: uppercase;
+}
+.mini-sp-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #5a6071;
+  margin: 10px 0 6px;
+}
+.mini-sp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.mini-sp-chip {
+  font-size: 11px;
+  padding: 4px 9px;
+  border: 1px solid rgba(20, 30, 60, 0.18);
+  background: #ffffff;
+  color: #1d2230;
+  border-radius: 999px;
+  font-weight: 500;
+}
+.mini-sp-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-family: "Times New Roman", Times, serif;
+  font-size: 14px;
+  color: #1d2230;
+  line-height: 1.45;
+}
+.mini-sp-list li {
+  padding-left: 14px;
+  position: relative;
+}
+.mini-sp-list li::before {
+  content: "•";
+  position: absolute;
+  left: 2px;
+  top: 0;
+  color: #5a6071;
+}
+.mini-sp-prio {
+  display: inline-block;
+  font-family: sans-serif;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b34a3a;
+  background: rgba(217, 90, 64, 0.10);
+  padding: 3px 7px;
+  border-radius: 4px;
+  margin-left: 8px;
+  vertical-align: 3px;
+}
+
+/* ------- MiniMCQ (radio + black submit, echoes real MCQSet.jsx) ------- */
+
+.mini-mcq-q {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.4;
+  margin-bottom: 14px;
+  color: #0a1024;
+}
+.mini-mcq-opt {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  margin: 6px 0;
+  border-radius: 8px;
+  border: 1px solid #ecf0f1;
+  font-size: 14px;
+  background: #ffffff;
+  color: #1d2230;
+  transition: background 350ms cubic-bezier(0.22, 1, 0.36, 1),
+              border-color 350ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mini-mcq-opt .mini-mcq-radio {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(20, 30, 60, 0.4);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mini-mcq-opt .mini-mcq-radio::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0a1024;
+  transform: scale(0);
+  transition: transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mini-mcq-opt.selected .mini-mcq-radio { border-color: #0a1024; }
+.mini-mcq-opt.selected .mini-mcq-radio::after { transform: scale(1); }
+.mini-mcq-opt.selected { background: #f5f5f5; }
+.mini-mcq-opt.correct .mini-mcq-radio { border-color: #1f7a4e; }
+.mini-mcq-opt.correct .mini-mcq-radio::after { background: #1f7a4e; transform: scale(1); }
+.mini-mcq-opt.correct { background: rgba(31, 122, 78, 0.07); border-color: rgba(31, 122, 78, 0.45); }
+.mini-mcq-opt .mini-mcq-check {
+  margin-left: auto;
+  width: 16px;
+  height: 16px;
+  color: #1f7a4e;
+  opacity: 0;
+  transform: scale(0.6);
+  transition: opacity 220ms ease, transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mini-mcq-opt.correct .mini-mcq-check { opacity: 1; transform: scale(1); }
+
+.mini-mcq-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.mini-mcq-submit {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 8px 16px;
+  border-radius: 6px;
+  background: #000000;
+  color: #ffffff;
+  border: 1px solid #000000;
+  transition: background 280ms cubic-bezier(0.22, 1, 0.36, 1),
+              color 280ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mini-mcq-submit.done {
+  background: rgba(31, 122, 78, 0.08);
+  border-color: rgba(31, 122, 78, 0.45);
+  color: #1f7a4e;
+}
+
+/* ------- MiniBreakdown (accordion-style rows, echoes real TopicBreakdown.jsx) ------- */
+
+.mini-bd-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid rgba(20, 30, 60, 0.12);
+  border-radius: 4px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  background: #ffffff;
+}
+.mini-bd-chevron {
+  width: 14px;
+  height: 14px;
+  color: #5a6071;
+  flex-shrink: 0;
+  transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+.mini-bd-row.open .mini-bd-chevron { transform: rotate(90deg); }
+.mini-bd-id {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid rgba(20, 30, 60, 0.3);
+  color: #1d2230;
+  background: #ffffff;
+  letter-spacing: 0.04em;
+}
+.mini-bd-title { color: #0a1024; font-weight: 500; }
+.mini-bd-summary {
+  margin: -2px 0 8px 32px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: #5a6071;
+  padding: 0 12px 8px;
+  border-left: 1px dashed rgba(20, 30, 60, 0.18);
+}
+
+/* ------- MiniFlowchart (typed nodes + dashed connectors, echoes real VisualFlowchart.jsx) ------- */
+
+.mini-fl-svg {
+  width: 100%;
+  height: 280px;
+  display: block;
+}
+.mini-fl-line {
+  stroke: #5a6071;
+  stroke-width: 1.5;
+  fill: none;
+  stroke-dasharray: 6 6;
+  animation: miniFlDash 6s linear infinite;
+}
+@keyframes miniFlDash {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -120; }
+}
+.mini-fl-arrow { fill: #5a6071; }
+.mini-fl-text {
+  font-family: sans-serif;
+  font-size: 12px;
+  fill: #0a1024;
+  font-weight: 500;
+}
+.mini-fl-text.inv { fill: #ffffff; }
+.mini-fl-yn {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ------- MiniDocQA ------- */
+
+.mini-doc-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 11px;
+  border-radius: 999px;
+  background: rgba(20, 30, 60, 0.05);
+  color: #1d2230;
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 14px;
+  border: 1px solid rgba(20, 30, 60, 0.12);
+}
+.mini-doc-pill svg { width: 14px; height: 14px; }
+.mini-doc-q {
+  font-size: 13px;
+  color: #5a6071;
+  margin-bottom: 6px;
+}
+.mini-doc-a {
+  font-size: 16px;
+  line-height: 1.45;
+  color: #1d2230;
+  font-weight: 400;
+}
+
+/* ------- prefers-reduced-motion ------- */
+@media (prefers-reduced-motion: reduce) {
+  .mini-fc-inner,
+  .mini-fl-line,
+  .mini-cursor {
+    animation: none !important;
+    transition: none !important;
+  }
+}
